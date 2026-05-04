@@ -58,7 +58,17 @@
             font-size: 22px; font-weight: bold; text-align: right;
             margin-top: 20px; color: var(--dark-green);
         }
-        .nota-final { text-align: center; font-style: italic; margin-top: 20px; color: #666; font-size: 14px;}
+        .nota-final { text-align: center; margin-top: 25px; color: #444; font-size: 15px; line-height: 1.5;}
+        .promo-desc {
+            display: none;
+            background-color: #e8ece7;
+            color: var(--dark-green);
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 10px;
+            font-size: 14px;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
@@ -68,17 +78,11 @@
             <label>Nombre y Apellido</label>
             <input type="text" id="nombre" required>
 
-            <label>Teléfono de contacto</label>
+            <label>Teléfono de contacto (WhatsApp)</label>
             <input type="tel" id="telefono" required>
 
             <label>Zona o dirección aproximada (Tigre y alrededores)</label>
             <input type="text" id="zona" required>
-
-            <label>Día de entrega preferido</label>
-            <select id="dia" required>
-                <option value="Viernes">Viernes</option>
-                <option value="Sábado">Sábado</option>
-            </select>
 
             <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
             <h2>Tus Focaccias</h2>
@@ -92,18 +96,22 @@
             </div>
 
             <label>Aclaraciones adicionales</label>
-            <textarea id="aclaraciones" rows="3" placeholder="Ej: Entregar por la tarde, el timbre no funciona..."></textarea>
+            <textarea id="aclaraciones" rows="3" placeholder="Ej: El timbre no funciona..."></textarea>
 
             <button type="submit" class="submit-btn" id="btnEnviar">Enviar Pedido</button>
-            <p class="nota-final">Pronto te contactaré para coordinar la entrega y el pago.</p>
+            
+            <div class="nota-final">
+                <strong>Medios de pago:</strong> Transferencia o Efectivo.<br><br>
+                <em>Pronto recibirás un mensaje por WhatsApp para la confirmación del pedido y coordinar la entrega.</em>
+            </div>
         </form>
     </div>
 
     <script>
         // --- PRECIOS ACTUALIZADOS --- //
         const PRECIOS = {
-            "Individual (F50)": 4200,    
-            "Familiar (F200)": 12000,     
+            "Individual": 4200,    
+            "Familiar": 12000,     
             "Promo Degustación": 16000
         };
         
@@ -121,20 +129,36 @@
 
             div.innerHTML = `
                 <button type="button" class="remove-btn" onclick="this.parentElement.remove(); calcularTotal()">X</button>
+                
                 <label>Formato</label>
                 <select class="formato-select" onchange="actualizarFila(this); calcularTotal()">
-                    <option value="Individual (F50)">Individual (F50)</option>
-                    <option value="Familiar (F200)">Familiar (F200)</option>
-                    <option value="Promo Degustación">Promo Degustación (1 de cada sabor)</option>
+                    <option value="Individual">Individual</option>
+                    <option value="Familiar">Familiar</option>
+                    <option value="Promo Degustación">Promo Degustación</option>
                 </select>
 
-                <label>Sabor</label>
+                <label class="sabor-label">Sabor</label>
                 <select class="sabor-select">
                     ${opcionesSabor}
                 </select>
+                
+                <div class="promo-desc">
+                    La promo es de 4 focaccias, una de cada sabor. Valor: $16.000.
+                </div>
 
                 <label>Cantidad</label>
-                <input type="number" class="cantidad-input" value="1" min="1" onchange="calcularTotal()">
+                <select class="cantidad-input" onchange="calcularTotal()">
+                    <option value="1" selected>1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                    <option value="10">10</option>
+                </select>
             `;
             container.appendChild(div);
             calcularTotal();
@@ -143,12 +167,17 @@
         function actualizarFila(selectElement) {
             const fila = selectElement.parentElement;
             const saborSelect = fila.querySelector('.sabor-select');
+            const saborLabel = fila.querySelector('.sabor-label');
+            const promoDesc = fila.querySelector('.promo-desc');
+            
             if (selectElement.value === "Promo Degustación") {
-                saborSelect.disabled = true;
-                saborSelect.innerHTML = `<option value="Los 4 sabores">Los 4 sabores incluidos</option>`;
+                saborSelect.style.display = "none";
+                saborLabel.style.display = "none";
+                promoDesc.style.display = "block";
             } else {
-                saborSelect.disabled = false;
-                saborSelect.innerHTML = SABORES.map(s => `<option value="${s}">${s}</option>`).join('');
+                saborSelect.style.display = "block";
+                saborLabel.style.display = "block";
+                promoDesc.style.display = "none";
             }
         }
 
@@ -170,9 +199,12 @@
 
             let items = [];
             document.querySelectorAll('.item-row').forEach(row => {
+                const formato = row.querySelector('.formato-select').value;
+                let sabor = formato === "Promo Degustación" ? "Los 4 sabores" : row.querySelector('.sabor-select').value;
+                
                 items.push({
-                    formato: row.querySelector('.formato-select').value,
-                    sabor: row.querySelector('.sabor-select').value,
+                    formato: formato,
+                    sabor: sabor,
                     cantidad: row.querySelector('.cantidad-input').value
                 });
             });
@@ -181,7 +213,7 @@
                 nombre: document.getElementById('nombre').value,
                 telefono: document.getElementById('telefono').value,
                 zona: document.getElementById('zona').value,
-                dia: document.getElementById('dia').value,
+                dia: "A coordinar", 
                 aclaraciones: document.getElementById('aclaraciones').value,
                 total: document.getElementById('totalPrecio').innerText,
                 items: items
