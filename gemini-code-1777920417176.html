@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pedido de Focaccias</title>
+    <style>
+        :root {
+            /* Paleta verde salvia y beige */
+            --sage-green: #8A9A86;
+            --beige: #F5F5DC;
+            --dark-green: #4A5D4E;
+            --text-color: #333;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--beige);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            border: 1px solid #e0e0e0;
+        }
+        h1, h2 { color: var(--dark-green); text-align: center; }
+        label { display: block; margin-top: 15px; font-weight: bold; font-size: 14px;}
+        input, select, textarea {
+            width: 100%; padding: 10px; margin-top: 5px;
+            border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box;
+            font-family: inherit;
+        }
+        .item-row {
+            background: #fafafa; padding: 15px; border-radius: 8px;
+            margin-top: 15px; border: 1px dashed var(--sage-green);
+            position: relative;
+        }
+        .remove-btn {
+            position: absolute; top: 10px; right: 10px;
+            background: #e74c3c; color: white; border: none;
+            border-radius: 4px; cursor: pointer; padding: 5px 10px; font-weight: bold;
+        }
+        .add-btn, .submit-btn {
+            border: none; padding: 12px 20px; border-radius: 6px;
+            cursor: pointer; width: 100%; margin-top: 20px;
+            font-weight: bold; font-size: 16px; transition: 0.3s;
+        }
+        .add-btn { background-color: transparent; color: var(--dark-green); border: 2px solid var(--sage-green); }
+        .add-btn:hover { background-color: var(--sage-green); color: white; }
+        .submit-btn { background-color: var(--dark-green); color: white; }
+        .submit-btn:hover { background-color: #38473b; }
+        .total-box {
+            font-size: 22px; font-weight: bold; text-align: right;
+            margin-top: 20px; color: var(--dark-green);
+        }
+        .nota-final { text-align: center; font-style: italic; margin-top: 20px; color: #666; font-size: 14px;}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Hacé tu pedido</h1>
+        <form id="pedidoForm">
+            <label>Nombre y Apellido</label>
+            <input type="text" id="nombre" required>
+
+            <label>Teléfono de contacto</label>
+            <input type="tel" id="telefono" required>
+
+            <label>Zona o dirección aproximada (Tigre y alrededores)</label>
+            <input type="text" id="zona" required>
+
+            <label>Día de entrega preferido</label>
+            <select id="dia" required>
+                <option value="Viernes">Viernes</option>
+                <option value="Sábado">Sábado</option>
+            </select>
+
+            <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
+            <h2>Tus Focaccias</h2>
+
+            <div id="itemsContainer"></div>
+
+            <button type="button" class="add-btn" onclick="agregarFila()">+ Agregar otro producto</button>
+
+            <div class="total-box">
+                Total: $<span id="totalPrecio">0</span>
+            </div>
+
+            <label>Aclaraciones adicionales</label>
+            <textarea id="aclaraciones" rows="3" placeholder="Ej: Entregar por la tarde, el timbre no funciona..."></textarea>
+
+            <button type="submit" class="submit-btn" id="btnEnviar">Enviar Pedido</button>
+            <p class="nota-final">Pronto te contactaré para coordinar la entrega y el pago.</p>
+        </form>
+    </div>
+
+    <script>
+        // --- PRECIOS ACTUALIZADOS --- //
+        const PRECIOS = {
+            "Individual (F50)": 4200,    
+            "Familiar (F200)": 12000,     
+            "Promo Degustación": 16000
+        };
+        
+        // URL de Google Apps Script
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwzDmjh1WVczdpJTCk894zj0GmJ8W7xHxHPfqx_9i0q5ELAE3zPWcUEZIv5554q2TKR/exec"; 
+        
+        const SABORES = ["Clásica (Sal gruesa y romero)", "Tomates cherry y ajo", "Cebolla morada", "Aceitunas"];
+
+        function agregarFila() {
+            const container = document.getElementById('itemsContainer');
+            const div = document.createElement('div');
+            div.className = 'item-row';
+
+            let opcionesSabor = SABORES.map(s => `<option value="${s}">${s}</option>`).join('');
+
+            div.innerHTML = `
+                <button type="button" class="remove-btn" onclick="this.parentElement.remove(); calcularTotal()">X</button>
+                <label>Formato</label>
+                <select class="formato-select" onchange="actualizarFila(this); calcularTotal()">
+                    <option value="Individual (F50)">Individual (F50)</option>
+                    <option value="Familiar (F200)">Familiar (F200)</option>
+                    <option value="Promo Degustación">Promo Degustación (1 de cada sabor)</option>
+                </select>
+
+                <label>Sabor</label>
+                <select class="sabor-select">
+                    ${opcionesSabor}
+                </select>
+
+                <label>Cantidad</label>
+                <input type="number" class="cantidad-input" value="1" min="1" onchange="calcularTotal()">
+            `;
+            container.appendChild(div);
+            calcularTotal();
+        }
+
+        function actualizarFila(selectElement) {
+            const fila = selectElement.parentElement;
+            const saborSelect = fila.querySelector('.sabor-select');
+            if (selectElement.value === "Promo Degustación") {
+                saborSelect.disabled = true;
+                saborSelect.innerHTML = `<option value="Los 4 sabores">Los 4 sabores incluidos</option>`;
+            } else {
+                saborSelect.disabled = false;
+                saborSelect.innerHTML = SABORES.map(s => `<option value="${s}">${s}</option>`).join('');
+            }
+        }
+
+        function calcularTotal() {
+            let total = 0;
+            document.querySelectorAll('.item-row').forEach(row => {
+                const formato = row.querySelector('.formato-select').value;
+                const cantidad = parseInt(row.querySelector('.cantidad-input').value) || 0;
+                total += (PRECIOS[formato] || 0) * cantidad;
+            });
+            document.getElementById('totalPrecio').innerText = total.toLocaleString('es-AR');
+        }
+
+        document.getElementById('pedidoForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const btnEnviar = document.getElementById('btnEnviar');
+            btnEnviar.disabled = true;
+            btnEnviar.innerText = "Procesando...";
+
+            let items = [];
+            document.querySelectorAll('.item-row').forEach(row => {
+                items.push({
+                    formato: row.querySelector('.formato-select').value,
+                    sabor: row.querySelector('.sabor-select').value,
+                    cantidad: row.querySelector('.cantidad-input').value
+                });
+            });
+
+            const datos = {
+                nombre: document.getElementById('nombre').value,
+                telefono: document.getElementById('telefono').value,
+                zona: document.getElementById('zona').value,
+                dia: document.getElementById('dia').value,
+                aclaraciones: document.getElementById('aclaraciones').value,
+                total: document.getElementById('totalPrecio').innerText,
+                items: items
+            };
+
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(datos)
+            }).then(() => {
+                alert("¡Tu pedido fue enviado con éxito!");
+                document.getElementById('pedidoForm').reset();
+                document.getElementById('itemsContainer').innerHTML = '';
+                agregarFila(); 
+                calcularTotal();
+            }).catch(error => {
+                alert("Hubo un error. Por favor intentá de nuevo.");
+            }).finally(() => {
+                btnEnviar.disabled = false;
+                btnEnviar.innerText = "Enviar Pedido";
+            });
+        });
+
+        window.onload = agregarFila;
+    </script>
+</body>
+</html>
