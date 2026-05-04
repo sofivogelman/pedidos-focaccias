@@ -3,242 +3,419 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pedido de Focaccias</title>
+    <title>Pedidos | Focaccias Artesanales</title>
     <style>
+        /* Tipografías elegantes */
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,600&family=Montserrat:wght@300;400;600&display=swap');
+
         :root {
-            /* Paleta verde salvia y beige */
-            --sage-green: #8A9A86;
-            --beige: #F5F5DC;
-            --dark-green: #4A5D4E;
-            --text-color: #333;
+            /* Nuevo verde: más oscuro y menos gris, pero manteniendo la onda natural */
+            --sage-green: #63825D;      
+            --light-sage: #e9ece8;
+            --beige: #F7F5F0;
+            --dark-green: #2B3A28;
+            --border-color: #d1d8ce;
+            --soft-red: #C57B7B;
         }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Montserrat', sans-serif;
             background-color: var(--beige);
-            color: var(--text-color);
+            color: var(--dark-green);
             margin: 0;
             padding: 20px;
+            display: flex;
+            justify-content: center;
         }
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background: white;
+
+        .form-container {
+            background-color: white;
+            max-width: 500px;
+            width: 100%;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(99, 130, 93, 0.15); /* Sombra tonalizada */
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        .form-header {
+            background-color: var(--light-sage);
+            padding: 30px 20px;
+            text-align: center;
+            border-bottom: 2px solid var(--sage-green);
+        }
+
+        .form-header svg {
+            margin-bottom: 10px;
+        }
+
+        .form-header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 28px;
+            margin: 0;
+            color: var(--dark-green);
+        }
+
+        .form-header p {
+            font-size: 13px;
+            color: var(--sage-green);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin: 5px 0 0 0;
+            font-weight: 600;
+        }
+
+        form {
             padding: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--dark-green);
+        }
+
+        input[type="text"],
+        input[type="tel"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 14px;
+            box-sizing: border-box;
+            background-color: #fafafa;
+            transition: all 0.3s ease;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--sage-green);
+            box-shadow: 0 0 0 3px rgba(99, 130, 93, 0.2);
+            background-color: white;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        /* Sección de pedido suave */
+        .order-section {
+            background-color: var(--light-sage);
+            padding: 20px;
             border-radius: 12px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-            border: 1px solid #e0e0e0;
+            margin-bottom: 20px;
+            border: 1px dashed var(--sage-green);
         }
-        h1, h2 { color: var(--dark-green); text-align: center; }
-        label { display: block; margin-top: 15px; font-weight: bold; font-size: 14px;}
-        input, select, textarea {
-            width: 100%; padding: 10px; margin-top: 5px;
-            border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box;
-            font-family: inherit;
-        }
-        .item-row {
-            background: #fafafa; padding: 15px; border-radius: 8px;
-            margin-top: 15px; border: 1px dashed var(--sage-green);
+
+        .order-item {
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 15px;
             position: relative;
         }
+
+        /* Botón de eliminar ítem */
         .remove-btn {
-            position: absolute; top: 10px; right: 10px;
-            background: #e74c3c; color: white; border: none;
-            border-radius: 4px; cursor: pointer; padding: 5px 10px; font-weight: bold;
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            color: var(--soft-red);
+            font-size: 18px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+            line-height: 1;
         }
-        .add-btn, .submit-btn {
-            border: none; padding: 12px 20px; border-radius: 6px;
-            cursor: pointer; width: 100%; margin-top: 20px;
-            font-weight: bold; font-size: 16px; transition: 0.3s;
-        }
-        .add-btn { background-color: transparent; color: var(--dark-green); border: 2px solid var(--sage-green); }
-        .add-btn:hover { background-color: var(--sage-green); color: white; }
-        .submit-btn { background-color: var(--dark-green); color: white; }
-        .submit-btn:hover { background-color: #38473b; }
-        .total-box {
-            font-size: 22px; font-weight: bold; text-align: right;
-            margin-top: 20px; color: var(--dark-green);
-        }
-        .nota-final { text-align: center; margin-top: 25px; color: #444; font-size: 15px; line-height: 1.5;}
+
+        /* Texto de la promo */
         .promo-desc {
             display: none;
-            background-color: #e8ece7;
-            color: var(--dark-green);
-            padding: 12px;
-            border-radius: 6px;
-            margin-top: 10px;
-            font-size: 14px;
+            font-size: 13px;
+            color: var(--sage-green);
             font-style: italic;
+            margin-top: 5px;
+            line-height: 1.4;
+            background-color: #f4f6f3;
+            padding: 10px;
+            border-radius: 6px;
+            border-left: 3px solid var(--sage-green);
+        }
+
+        /* Botón elegante para sumar productos */
+        .add-item-btn {
+            width: 100%;
+            background-color: transparent;
+            color: var(--sage-green);
+            border: 1px dashed var(--sage-green);
+            padding: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        .add-item-btn:hover {
+            background-color: rgba(99, 130, 93, 0.1);
+        }
+
+        .total-price {
+            font-size: 18px;
+            font-weight: 600;
+            text-align: right;
+            margin-top: 15px;
+            color: var(--dark-green);
+        }
+
+        button[type="submit"] {
+            width: 100%;
+            background-color: var(--sage-green);
+            color: white;
+            border: none;
+            padding: 15px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Montserrat', sans-serif;
+            transition: background-color 0.3s ease;
+            margin-top: 10px;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #516b4c;
+        }
+
+        #mensajeExito {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: var(--dark-green);
+            background-color: var(--light-sage);
+            border-radius: 8px;
+            margin-top: 20px;
+            font-weight: 600;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Hacé tu pedido</h1>
+
+    <div class="form-container">
+        <div class="form-header">
+            <svg width="40" height="40" viewBox="0 0 100 100">
+                <path d="M50,90 Q45,50 55,10" stroke="#63825D" stroke-width="3" fill="none"/>
+                <ellipse cx="52" cy="70" rx="4" ry="12" fill="#63825D" transform="rotate(30 52 70)"/>
+                <ellipse cx="48" cy="55" rx="4" ry="12" fill="#63825D" transform="rotate(-30 48 55)"/>
+                <ellipse cx="54" cy="40" rx="4" ry="12" fill="#63825D" transform="rotate(25 54 40)"/>
+                <ellipse cx="46" cy="25" rx="4" ry="12" fill="#63825D" transform="rotate(-25 46 25)"/>
+            </svg>
+            <h1>Hacé tu pedido</h1>
+            <p>Focaccias Artesanales</p>
+        </div>
+
         <form id="pedidoForm">
-            <label>Nombre y Apellido</label>
-            <input type="text" id="nombre" required>
-
-            <label>Teléfono de contacto (WhatsApp)</label>
-            <input type="tel" id="telefono" required>
-
-            <label>Zona o dirección aproximada (Tigre y alrededores)</label>
-            <input type="text" id="zona" required>
-
-            <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
-            <h2>Tus Focaccias</h2>
-
-            <div id="itemsContainer"></div>
-
-            <button type="button" class="add-btn" onclick="agregarFila()">+ Agregar otro producto</button>
-
-            <div class="total-box">
-                Total: $<span id="totalPrecio">0</span>
+            <div class="form-group">
+                <label for="nombre">Nombre y Apellido</label>
+                <input type="text" id="nombre" name="nombre" required placeholder="Ej: María Pérez">
             </div>
 
-            <label>Aclaraciones adicionales</label>
-            <textarea id="aclaraciones" rows="3" placeholder="Ej: El timbre no funciona..."></textarea>
-
-            <button type="submit" class="submit-btn" id="btnEnviar">Enviar Pedido</button>
-            
-            <div class="nota-final">
-                <strong>Medios de pago:</strong> Transferencia o Efectivo.<br><br>
-                <em>Pronto recibirás un mensaje por WhatsApp para la confirmación del pedido y coordinar la entrega.</em>
+            <div class="form-group">
+                <label for="telefono">Teléfono (WhatsApp)</label>
+                <input type="tel" id="telefono" name="telefono" required placeholder="Ej: 1123456789">
             </div>
+
+            <div class="form-group">
+                <label for="zona">Zona de entrega</label>
+                <input type="text" id="zona" name="zona" required placeholder="Ej: Tigre Centro">
+            </div>
+
+            <div class="order-section">
+                <div id="items-container">
+                    <!-- Primer ítem -->
+                    <div class="order-item">
+                        <div class="form-group">
+                            <label>Formato</label>
+                            <select class="formato-select" required onchange="manejarCambioFormato(this)">
+                                <option value="" disabled selected>Elegí una opción...</option>
+                                <option value="Individual">Individual (15x12) - $4.200</option>
+                                <option value="Familiar">Familiar (31x21) - $12.000</option>
+                                <option value="Promo">Promo Degustación (4 Indiv.) - $16.000</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group sabor-group">
+                            <label>Sabor</label>
+                            <select class="sabor-select" required>
+                                <option value="" disabled selected>Elegí un sabor...</option>
+                                <option value="Clásica (Romero y Sal)">🧂 Clásica (Romero y Sal)</option>
+                                <option value="Papa y Parmesano">🧀 Papa y Parmesano</option>
+                                <option value="Tomate Cherry y Pesto">🍅 Tomate Cherry y Pesto</option>
+                                <option value="Aceitunas">🫒 Aceitunas</option>
+                            </select>
+                            <div class="promo-desc">
+                                ✨ <strong>Esta promo incluye las 4 variedades:</strong> Romero y Sal, Papa y Parmesano, Tomate Cherry y Pesto, y Aceitunas.
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label>Cantidad</label>
+                            <select class="cantidad-select" required onchange="calcularTotal()">
+                                <option value="1">1</option><option value="2">2</option>
+                                <option value="3">3</option><option value="4">4</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="button" class="add-item-btn" onclick="agregarItem()">+ Agregar otro producto</button>
+                
+                <div class="total-price" id="totalTexto">Total: $0</div>
+            </div>
+
+            <div class="form-group">
+                <label for="aclaraciones">Aclaraciones adicionales (Opcional)</label>
+                <textarea id="aclaraciones" name="aclaraciones" placeholder="Si necesitás agregar algo más, escribilo acá..."></textarea>
+            </div>
+
+            <button type="submit">Confirmar Pedido</button>
+            <div id="mensajeExito">¡Gracias! Tu pedido fue registrado correctamente. 🌿</div>
         </form>
     </div>
 
     <script>
-        // --- PRECIOS ACTUALIZADOS --- //
-        const PRECIOS = {
-            "Individual": 4200,    
-            "Familiar": 12000,     
-            "Promo Degustación": 16000
-        };
-        
-        // URL de Google Apps Script
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwSNS4xrfkPOgCvVpSGSbM3kpPRo2-6ZjQmQVN3mjUbLdLPtYlAru-HNjxbJ19HGaqb/exec"; 
-        
-        const SABORES = ["Romero y Sal Gruesa", "Tomates Cherry y Pesto", "Papa y Parmesano", "Aceitunas"];
+        // PEGAR ACÁ TU URL DE APPS SCRIPT
+        const GOOGLE_SCRIPT_URL = "PEGAR_ACA_TU_URL_DE_APPS_SCRIPT";
 
-        function agregarFila() {
-            const container = document.getElementById('itemsContainer');
-            const div = document.createElement('div');
-            div.className = 'item-row';
+        // Lógica para ocultar menú de sabores y mostrar texto en la Promo
+        function manejarCambioFormato(selectElement) {
+            const itemContainer = selectElement.closest('.order-item');
+            const saborSelect = itemContainer.querySelector('.sabor-select');
+            const promoDesc = itemContainer.querySelector('.promo-desc');
 
-            let opcionesSabor = SABORES.map(s => `<option value="${s}">${s}</option>`).join('');
-
-            div.innerHTML = `
-                <button type="button" class="remove-btn" onclick="this.parentElement.remove(); calcularTotal()">X</button>
-                
-                <label>Formato</label>
-                <select class="formato-select" onchange="actualizarFila(this); calcularTotal()">
-                    <option value="Individual">Individual</option>
-                    <option value="Familiar">Familiar</option>
-                    <option value="Promo Degustación">Promo Degustación</option>
-                </select>
-
-                <label class="sabor-label">Sabor</label>
-                <select class="sabor-select">
-                    ${opcionesSabor}
-                </select>
-                
-                <div class="promo-desc">
-                    La promo es de 4 focaccias, una de cada sabor. Valor: $16.000.
-                </div>
-
-                <label>Cantidad</label>
-                <select class="cantidad-input" onchange="calcularTotal()">
-                    <option value="1" selected>1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                    <option value="5">5</option>
-                    <option value="6">6</option>
-                    <option value="7">7</option>
-                    <option value="8">8</option>
-                    <option value="9">9</option>
-                    <option value="10">10</option>
-                </select>
-            `;
-            container.appendChild(div);
-            calcularTotal();
-        }
-
-        function actualizarFila(selectElement) {
-            const fila = selectElement.parentElement;
-            const saborSelect = fila.querySelector('.sabor-select');
-            const saborLabel = fila.querySelector('.sabor-label');
-            const promoDesc = fila.querySelector('.promo-desc');
-            
-            if (selectElement.value === "Promo Degustación") {
-                saborSelect.style.display = "none";
-                saborLabel.style.display = "none";
-                promoDesc.style.display = "block";
+            if (selectElement.value === 'Promo') {
+                saborSelect.style.display = 'none';
+                saborSelect.removeAttribute('required'); // Le sacamos el required para que deje enviar el formulario
+                promoDesc.style.display = 'block';
             } else {
-                saborSelect.style.display = "block";
-                saborLabel.style.display = "block";
-                promoDesc.style.display = "none";
+                saborSelect.style.display = 'block';
+                saborSelect.setAttribute('required', 'required');
+                promoDesc.style.display = 'none';
             }
+            calcularTotal();
         }
 
         function calcularTotal() {
             let total = 0;
-            document.querySelectorAll('.item-row').forEach(row => {
-                const formato = row.querySelector('.formato-select').value;
-                const cantidad = parseInt(row.querySelector('.cantidad-input').value) || 0;
-                total += (PRECIOS[formato] || 0) * cantidad;
+            const items = document.querySelectorAll('.order-item');
+            
+            items.forEach(item => {
+                const formato = item.querySelector('.formato-select').value;
+                const cantidad = parseInt(item.querySelector('.cantidad-select').value) || 1;
+                
+                let precioUnitario = 0;
+                if (formato === 'Individual') precioUnitario = 4200;
+                else if (formato === 'Familiar') precioUnitario = 12000;
+                else if (formato === 'Promo') precioUnitario = 16000;
+
+                total += (precioUnitario * cantidad);
             });
-            document.getElementById('totalPrecio').innerText = total.toLocaleString('es-AR');
+
+            document.getElementById('totalTexto').innerText = total > 0 ? "Total: $" + total.toLocaleString('es-AR') : "Total: $0";
+        }
+
+        function agregarItem() {
+            const container = document.getElementById('items-container');
+            const primerItem = container.querySelector('.order-item');
+            const nuevoItem = primerItem.cloneNode(true);
+            
+            // Reseteamos valores
+            nuevoItem.querySelector('.formato-select').value = "";
+            
+            const saborSelect = nuevoItem.querySelector('.sabor-select');
+            saborSelect.value = "";
+            saborSelect.style.display = 'block';
+            saborSelect.setAttribute('required', 'required');
+            
+            nuevoItem.querySelector('.promo-desc').style.display = 'none';
+            nuevoItem.querySelector('.cantidad-select').value = "1";
+
+            // Agregamos la cruz para eliminar (solo a los nuevos)
+            const btnEliminar = document.createElement('button');
+            btnEliminar.type = 'button';
+            btnEliminar.className = 'remove-btn';
+            btnEliminar.innerHTML = '✖';
+            btnEliminar.onclick = function() {
+                nuevoItem.remove();
+                calcularTotal();
+            };
+            nuevoItem.appendChild(btnEliminar);
+
+            container.appendChild(nuevoItem);
         }
 
         document.getElementById('pedidoForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            const btnEnviar = document.getElementById('btnEnviar');
-            btnEnviar.disabled = true;
-            btnEnviar.innerText = "Procesando...";
+            
+            const submitBtn = this.querySelector('button[type="submit"]');
+            submitBtn.innerText = 'Enviando...';
+            submitBtn.disabled = true;
 
-            let items = [];
-            document.querySelectorAll('.item-row').forEach(row => {
-                const formato = row.querySelector('.formato-select').value;
-                let sabor = formato === "Promo Degustación" ? "Los 4 sabores" : row.querySelector('.sabor-select').value;
+            const itemsAgregados = [];
+            document.querySelectorAll('.order-item').forEach(item => {
+                const formato = item.querySelector('.formato-select').value;
+                // Si es promo, mandamos "Los 4 sabores" al Google Sheet
+                const sabor = formato === 'Promo' ? "Promo (Los 4 sabores)" : item.querySelector('.sabor-select').value;
                 
-                items.push({
+                itemsAgregados.push({
                     formato: formato,
                     sabor: sabor,
-                    cantidad: row.querySelector('.cantidad-input').value
+                    cantidad: item.querySelector('.cantidad-select').value
                 });
             });
 
-            const datos = {
+            const data = {
                 nombre: document.getElementById('nombre').value,
                 telefono: document.getElementById('telefono').value,
                 zona: document.getElementById('zona').value,
-                dia: "A coordinar", 
+                dia: "A coordinar",
                 aclaraciones: document.getElementById('aclaraciones').value,
-                total: document.getElementById('totalPrecio').innerText,
-                items: items
+                total: document.getElementById('totalTexto').innerText.replace("Total: ", ""),
+                items: itemsAgregados
             };
 
             fetch(GOOGLE_SCRIPT_URL, {
                 method: 'POST',
                 mode: 'no-cors',
+                cache: 'no-cache',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(datos)
-            }).then(() => {
-                alert("¡Tu pedido fue enviado con éxito!");
-                document.getElementById('pedidoForm').reset();
-                document.getElementById('itemsContainer').innerHTML = '';
-                agregarFila(); 
-                calcularTotal();
-            }).catch(error => {
-                alert("Hubo un error. Por favor intentá de nuevo.");
-            }).finally(() => {
-                btnEnviar.disabled = false;
-                btnEnviar.innerText = "Enviar Pedido";
+                body: JSON.stringify(data)
+            })
+            .then(() => {
+                document.getElementById('pedidoForm').style.display = 'none';
+                document.getElementById('mensajeExito').style.display = 'block';
+            })
+            .catch(error => {
+                alert('Hubo un error. Por favor, intentá de nuevo.');
+                submitBtn.innerText = 'Confirmar Pedido';
+                submitBtn.disabled = false;
             });
         });
-
-        window.onload = agregarFila;
     </script>
 </body>
 </html>
