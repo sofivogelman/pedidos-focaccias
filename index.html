@@ -282,10 +282,23 @@
                 <input type="tel" id="telefono" name="telefono" required placeholder="Ej: 1123456789">
             </div>
 
+            <!-- ACÁ EMPIEZA LO NUEVO DE LA ZONA -->
             <div class="form-group">
                 <label for="zona">Zona de entrega</label>
-                <input type="text" id="zona" name="zona" required placeholder="Ej: Tigre Centro">
+                <select id="zona" name="zona" required onchange="manejarCambioZona(this)">
+                    <option value="" disabled selected>Elegí una opción...</option>
+                    <option value="Vila Terra">Vila Terra</option>
+                    <option value="Nordelta">Nordelta</option>
+                    <option value="Terrazas/Casas de Santa Maria">Terrazas/Casas de Santa Maria</option>
+                    <option value="Barrio de Villa Nueva">Barrio de Villa Nueva</option>
+                </select>
+                
+                <!-- Esta cajita está oculta por defecto y aparece si eligen Villa Nueva -->
+                <div id="barrioEspecificoContainer" style="display: none; margin-top: 10px;">
+                    <input type="text" id="barrioEspecifico" name="barrioEspecifico" placeholder="¿Qué barrio? (Ej: San Isidro Labrador)">
+                </div>
             </div>
+            <!-- ACÁ TERMINA LO NUEVO DE LA ZONA -->
 
             <div class="order-section">
                 <div id="items-container">
@@ -349,8 +362,23 @@
     </div>
 
     <script>
-        // ACÁ YA ESTÁ INTEGRADA TU URL REAL
+        // PEGAR ACÁ TU URL DE APPS SCRIPT
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwSNS4xrfkPOgCvVpSGSbM3kpPRo2-6ZjQmQVN3mjUbLdLPtYlAru-HNjxbJ19HGaqb/exec";
+
+        // Función nueva para mostrar/ocultar el input del barrio
+        function manejarCambioZona(selectElement) {
+            const container = document.getElementById('barrioEspecificoContainer');
+            const input = document.getElementById('barrioEspecifico');
+
+            if (selectElement.value === 'Barrio de Villa Nueva') {
+                container.style.display = 'block';
+                input.setAttribute('required', 'required');
+            } else {
+                container.style.display = 'none';
+                input.removeAttribute('required');
+                input.value = ''; // Limpiamos si se arrepintió y eligió otra cosa
+            }
+        }
 
         function manejarCambioFormato(selectElement) {
             const itemContainer = selectElement.closest('.order-item');
@@ -438,10 +466,17 @@
                 });
             });
 
+            // Lógica para armar el texto final de la zona elegida
+            let zonaFinal = document.getElementById('zona').value;
+            if (zonaFinal === 'Barrio de Villa Nueva') {
+                const barrio = document.getElementById('barrioEspecifico').value;
+                zonaFinal = "Villa Nueva - " + barrio; 
+            }
+
             const data = {
                 nombre: document.getElementById('nombre').value,
                 telefono: document.getElementById('telefono').value,
-                zona: document.getElementById('zona').value,
+                zona: zonaFinal, // Acá mandamos la zona ya armada y prolija
                 dia: "A coordinar",
                 aclaraciones: document.getElementById('aclaraciones').value,
                 total: document.getElementById('totalTexto').innerText.replace("Total: ", ""),
