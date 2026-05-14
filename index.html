@@ -302,11 +302,10 @@
                     <option value="Otro">Otro</option>
                 </select>
                 
-                <!-- El disclaimer ahora está visible para todas las zonas -->
                 <p class="disclaimer-zona">⚠️ Importante: Las entregas están sujetas a coordinación previa de días y horarios.</p>
                 
                 <div id="barrioEspecificoContainer" style="display: none; margin-top: 10px;">
-                    <input type="text" id="barrioEspecifico" name="barrioEspecifico" placeholder="¿Qué barrio? (Ej: San Isidro Labrador)">
+                    <input type="text" id="barrioEspecifico" name="barrioEspecifico" placeholder="¿Dónde? (Ej: San Isidro Labrador u otra zona)">
                 </div>
             </div>
 
@@ -378,7 +377,7 @@
             const container = document.getElementById('barrioEspecificoContainer');
             const input = document.getElementById('barrioEspecifico');
 
-            if (selectElement.value === 'Barrio de Villa Nueva') || (selectElement.value === 'Otro'){
+            if (selectElement.value === 'Barrio de Villa Nueva' || selectElement.value === 'Otro') {
                 container.style.display = 'block';
                 input.setAttribute('required', 'required');
             } else {
@@ -474,10 +473,11 @@
                 });
             });
 
-            let zonaFinal = document.getElementById('zona').value;
-            if (zonaFinal === 'Barrio de Villa Nueva') {
+            const zonaSeleccionada = document.getElementById('zona').value;
+            let zonaFinal = zonaSeleccionada;
+            if (zonaSeleccionada === 'Barrio de Villa Nueva' || zonaSeleccionada === 'Otro') {
                 const barrio = document.getElementById('barrioEspecifico').value;
-                zonaFinal = "Villa Nueva - " + barrio; 
+                zonaFinal = zonaSeleccionada + " - " + barrio; 
             }
 
             const data = {
