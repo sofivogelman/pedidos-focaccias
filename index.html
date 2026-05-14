@@ -299,6 +299,7 @@
                     <option value="Lirios del Talar">Lirios del Talar</option>
                     <option value="Terrazas/Casas de Santa Maria">Terrazas/Casas de Santa Maria</option>
                     <option value="Barrio de Villa Nueva">Barrio de Villa Nueva</option>
+                    <option value="Otro">Otro</option>
                 </select>
                 
                 <!-- El disclaimer ahora está visible para todas las zonas -->
@@ -377,7 +378,7 @@
             const container = document.getElementById('barrioEspecificoContainer');
             const input = document.getElementById('barrioEspecifico');
 
-            if (selectElement.value === 'Barrio de Villa Nueva') {
+            if (selectElement.value === 'Barrio de Villa Nueva') || (selectElement.value === 'Otro'){
                 container.style.display = 'block';
                 input.setAttribute('required', 'required');
             } else {
