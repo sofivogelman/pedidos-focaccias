@@ -318,12 +318,12 @@
                                 <option value="" disabled selected>Elegí una opción...</option>
                                 <option value="Individual">Individual (15x12) - $4.200</option>
                                 <option value="Familiar">Familiar (31x21) - $12.000</option>
-                                <option value="Promo">Promo Degustación (4 Indiv.) - $16.000</option>
+                                <option value="Promo25">Especial 25 de Mayo (2 Fam.) - $21.000</option>
                             </select>
                         </div>
 
                         <div class="form-group sabor-group">
-                            <label>Sabor</label>
+                            <label>Sabor/es</label>
                             <select class="sabor-select" required>
                                 <option value="" disabled selected>Elegí un sabor...</option>
                                 <option value="Clásica (Romero y Sal)">🌿 Clásica (Romero y Sal)</option>
@@ -331,8 +331,17 @@
                                 <option value="Tomate Cherry y Pesto">🍅 Tomate Cherry y Pesto</option>
                                 <option value="Aceitunas">🫒 Aceitunas</option>
                             </select>
+                            
+                            <select class="sabor-select-2" style="display: none; margin-top: 10px;">
+                                <option value="" disabled selected>Elegí el segundo sabor...</option>
+                                <option value="Clásica (Romero y Sal)">🌿 Clásica (Romero y Sal)</option>
+                                <option value="Papa y Parmesano">🧀 Papa y Parmesano</option>
+                                <option value="Tomate Cherry y Pesto">🍅 Tomate Cherry y Pesto</option>
+                                <option value="Aceitunas">🫒 Aceitunas</option>
+                            </select>
+
                             <div class="promo-desc">
-                                ✨ <strong>Esta promo incluye las 4 variedades:</strong> Romero y Sal, Papa y Parmesano, Tomate Cherry y Pesto, y Aceitunas.
+                                🇦🇷 <strong>Especial 25 de Mayo:</strong> ¡Llevás 2 focaccias familiares! No te olvides de elegir tus dos sabores favoritos arriba.
                             </div>
                         </div>
 
@@ -360,7 +369,6 @@
         </form>
     </div>
 
-    <!-- EL CARTELITO EMERGENTE -->
     <div id="modalExito" class="modal-overlay">
         <div class="modal-box">
             <div class="modal-icon">🌿</div>
@@ -390,15 +398,25 @@
         function manejarCambioFormato(selectElement) {
             const itemContainer = selectElement.closest('.order-item');
             const saborSelect = itemContainer.querySelector('.sabor-select');
+            const saborSelect2 = itemContainer.querySelector('.sabor-select-2');
             const promoDesc = itemContainer.querySelector('.promo-desc');
 
-            if (selectElement.value === 'Promo') {
-                saborSelect.style.display = 'none';
-                saborSelect.removeAttribute('required');
+            if (selectElement.value === 'Promo25') {
+                saborSelect.style.display = 'block';
+                saborSelect.setAttribute('required', 'required');
+                
+                saborSelect2.style.display = 'block';
+                saborSelect2.setAttribute('required', 'required');
+                
                 promoDesc.style.display = 'block';
             } else {
                 saborSelect.style.display = 'block';
                 saborSelect.setAttribute('required', 'required');
+                
+                saborSelect2.style.display = 'none';
+                saborSelect2.removeAttribute('required');
+                saborSelect2.value = "";
+                
                 promoDesc.style.display = 'none';
             }
             calcularTotal();
@@ -415,7 +433,7 @@
                 let precioUnitario = 0;
                 if (formato === 'Individual') precioUnitario = 4200;
                 else if (formato === 'Familiar') precioUnitario = 12000;
-                else if (formato === 'Promo') precioUnitario = 16000;
+                else if (formato === 'Promo25') precioUnitario = 21000;
 
                 total += (precioUnitario * cantidad);
             });
@@ -429,10 +447,17 @@
             const nuevoItem = primerItem.cloneNode(true);
             
             nuevoItem.querySelector('.formato-select').value = "";
+            
             const saborSelect = nuevoItem.querySelector('.sabor-select');
             saborSelect.value = "";
             saborSelect.style.display = 'block';
             saborSelect.setAttribute('required', 'required');
+            
+            const saborSelect2 = nuevoItem.querySelector('.sabor-select-2');
+            saborSelect2.value = "";
+            saborSelect2.style.display = 'none';
+            saborSelect2.removeAttribute('required');
+
             nuevoItem.querySelector('.promo-desc').style.display = 'none';
             nuevoItem.querySelector('.cantidad-select').value = "1";
 
@@ -464,7 +489,12 @@
             const itemsAgregados = [];
             document.querySelectorAll('.order-item').forEach(item => {
                 const formato = item.querySelector('.formato-select').value;
-                const sabor = formato === 'Promo' ? "Promo (Los 4 sabores)" : item.querySelector('.sabor-select').value;
+                let sabor = item.querySelector('.sabor-select').value;
+                
+                if (formato === 'Promo25') {
+                    const sabor2 = item.querySelector('.sabor-select-2').value;
+                    sabor = `Promo (25 de Mayo): ${sabor} + ${sabor2}`;
+                }
                 
                 itemsAgregados.push({
                     formato: formato,
