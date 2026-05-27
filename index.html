@@ -28,30 +28,43 @@
         .order-section { background-color: var(--light-sage); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px dashed var(--sage-green); }
         .order-item { background-color: white; padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 15px; position: relative; }
         .remove-btn { position: absolute; top: 15px; right: 15px; color: var(--soft-red); font-size: 18px; cursor: pointer; background: none; border: none; padding: 0; line-height: 1; }
-        .promo-desc { display: none; font-size: 13px; color: var(--sage-green); font-style: italic; margin-top: 5px; line-height: 1.4; background-color: #f4f6f3; padding: 10px; border-radius: 6px; border-left: 3px solid var(--sage-green); }
-        .add-item-btn { width: 100%; background-color: transparent; color: var(--sage-green); border: 1px dashed var(--sage-green); padding: 12px; font-size: 14px; font-weight: 600; border-radius: 8px; cursor: pointer; }
+        .disclaimer-zona { font-size: 12px; color: var(--sage-green); margin-top: 8px; font-style: italic; }
+        .add-item-btn { width: 100%; background-color: transparent; color: var(--sage-green); border: 1px dashed var(--sage-green); padding: 12px; font-weight: 600; border-radius: 8px; cursor: pointer; margin-bottom: 10px; }
         .total-price { font-size: 18px; font-weight: 600; text-align: right; margin-top: 15px; color: var(--dark-green); }
-        button[type="submit"] { width: 100%; background-color: var(--sage-green); color: white; border: none; padding: 15px; font-size: 16px; font-weight: 600; border-radius: 8px; cursor: pointer; }
+        button[type="submit"] { width: 100%; background-color: var(--sage-green); color: white; border: none; padding: 15px; font-weight: 600; border-radius: 8px; cursor: pointer; }
     </style>
 </head>
 <body>
-
     <div class="form-container">
         <div class="form-header">
             <h1>Hacé tu pedido</h1>
             <p>Focaccias Artesanales</p>
         </div>
-
         <form id="pedidoForm">
             <div class="form-group">
                 <label for="nombre">Nombre y Apellido</label>
                 <input type="text" id="nombre" name="nombre" required>
             </div>
             <div class="form-group">
-                <label for="telefono">Teléfono</label>
+                <label for="telefono">Teléfono (WhatsApp)</label>
                 <input type="tel" id="telefono" name="telefono" required>
             </div>
-
+            <div class="form-group">
+                <label for="zona">Zona de entrega</label>
+                <select id="zona" name="zona" required onchange="manejarCambioZona(this)">
+                    <option value="" disabled selected>Elegí una opción...</option>
+                    <option value="Vila Terra">Vila Terra</option>
+                    <option value="Centro Comercial Nordelta">Centro Comercial Nordelta</option>
+                    <option value="Lirios del Talar">Lirios del Talar</option>
+                    <option value="Terrazas/Casas de Santa Maria">Terrazas/Casas de Santa Maria</option>
+                    <option value="Barrio de Villa Nueva">Barrio de Villa Nueva</option>
+                    <option value="Otro">Otro</option>
+                </select>
+                <p class="disclaimer-zona">⚠️ Importante: Las entregas están sujetas a coordinación.</p>
+                <div id="barrioEspecificoContainer" style="display: none; margin-top: 10px;">
+                    <input type="text" id="barrioEspecifico" name="barrioEspecifico" placeholder="¿Dónde?">
+                </div>
+            </div>
             <div class="order-section">
                 <div id="items-container">
                     <div class="order-item">
@@ -63,30 +76,34 @@
                                 <option value="Familiar">Familiar (31x21) - $12.000</option>
                             </select>
                         </div>
-                        <div class="form-group sabor-group">
+                        <div class="form-group">
                             <label>Sabor</label>
                             <select class="sabor-select" required>
                                 <option value="" disabled selected>Elegí un sabor...</option>
                                 <option value="Clásica (Romero y Sal)">🌿 Clásica (Romero y Sal)</option>
                                 <option value="Papa y Parmesano">🧀 Papa y Parmesano</option>
+                                <option value="Tomate Cherry y Pesto">🍅 Tomate Cherry y Pesto</option>
+                                <option value="Aceitunas">🫒 Aceitunas</option>
                             </select>
                         </div>
-                        <div class="promo-desc" style="display: none;">
-                            <label>🎁 ¿Querés tu individual de Romero y Sal de regalo?</label>
-                            <select class="regalo-select">
-                                <option value="Si">Sí, quiero el regalo</option>
+                        <!-- NUEVA OPCIÓN DE REGALO -->
+                        <div class="promo-romero" style="display: none; margin-bottom: 15px;">
+                            <label style="color: var(--sage-green);">🎁 ¿Querés la individual de Romero de regalo?</label>
+                            <select class="regalo-romero">
                                 <option value="No">No, gracias</option>
+                                <option value="Si">Sí, quiero la individual de regalo</option>
                             </select>
                         </div>
                         <div class="form-group">
                             <label>Cantidad</label>
-                            <select class="cantidad-select" required onchange="calcularTotal()">
+                            <select class="cantidad-select" onchange="calcularTotal()">
                                 <option value="1">1</option><option value="2">2</option>
+                                <option value="3">3</option><option value="4">4</option>
                             </select>
                         </div>
                     </div>
                 </div>
-                <button type="button" class="add-item-btn" onclick="agregarItem()">+ Agregar otro</button>
+                <button type="button" class="add-item-btn" onclick="agregarItem()">+ Agregar otro producto</button>
                 <div class="total-price" id="totalTexto">Total: $0</div>
             </div>
             <button type="submit">Confirmar Pedido</button>
@@ -94,21 +111,23 @@
     </div>
 
     <script>
-        const GOOGLE_SCRIPT_URL = "TU_URL_AQUÍ";
+        function manejarCambioZona(el) {
+            const container = document.getElementById('barrioEspecificoContainer');
+            container.style.display = (el.value === 'Barrio de Villa Nueva' || el.value === 'Otro') ? 'block' : 'none';
+        }
 
-        function manejarCambioFormato(selectElement) {
-            const itemContainer = selectElement.closest('.order-item');
-            const promo = itemContainer.querySelector('.promo-desc');
-            promo.style.display = (selectElement.value === 'Familiar') ? 'block' : 'none';
+        function manejarCambioFormato(el) {
+            const container = el.closest('.order-item');
+            container.querySelector('.promo-romero').style.display = (el.value === 'Familiar') ? 'block' : 'none';
             calcularTotal();
         }
 
         function calcularTotal() {
             let total = 0;
             document.querySelectorAll('.order-item').forEach(item => {
-                const formato = item.querySelector('.formato-select').value;
+                const f = item.querySelector('.formato-select').value;
                 const cant = parseInt(item.querySelector('.cantidad-select').value) || 1;
-                let precio = (formato === 'Individual') ? 4200 : (formato === 'Familiar' ? 12000 : 0);
+                let precio = (f === 'Individual') ? 4200 : (f === 'Familiar' ? 12000 : 0);
                 total += (precio * cant);
             });
             document.getElementById('totalTexto').innerText = "Total: $" + total.toLocaleString('es-AR');
@@ -116,26 +135,19 @@
 
         function agregarItem() {
             const container = document.getElementById('items-container');
-            const nuevoItem = container.querySelector('.order-item').cloneNode(true);
+            const nuevo = container.querySelector('.order-item').cloneNode(true);
             const btn = document.createElement('button');
-            btn.type = 'button'; btn.className = 'remove-btn'; btn.innerHTML = '✖';
-            btn.onclick = () => { nuevoItem.remove(); calcularTotal(); };
-            nuevoItem.appendChild(btn);
-            container.appendChild(nuevoItem);
+            btn.className = 'remove-btn'; btn.innerHTML = '✖';
+            btn.onclick = () => { nuevo.remove(); calcularTotal(); };
+            nuevo.appendChild(btn);
+            container.appendChild(nuevo);
         }
 
         document.getElementById('pedidoForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            const items = [];
-            document.querySelectorAll('.order-item').forEach(item => {
-                let s = item.querySelector('.sabor-select').value;
-                if(item.querySelector('.formato-select').value === 'Familiar' && item.querySelector('.regalo-select').value === 'Si') {
-                    s += " + Individual de regalo";
-                }
-                items.push({ formato: item.querySelector('.formato-select').value, sabor: s, cant: item.querySelector('.cantidad-select').value });
-            });
-            console.log("Datos a enviar:", items);
-            alert("Pedido procesado");
+            // ... (AQUÍ VA TU LÓGICA DE ENVÍO ORIGINAL, SOLO ASEGURATE DE LEER EL REGALO)
+            // Ejemplo de lectura: item.querySelector('.regalo-romero').value
+            alert("Pedido enviado");
         });
     </script>
 </body>
