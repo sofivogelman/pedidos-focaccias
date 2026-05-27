@@ -142,14 +142,18 @@
         .promo-desc {
             display: none;
             font-size: 13px;
-            color: var(--sage-green);
-            font-style: italic;
-            margin-top: 5px;
-            line-height: 1.4;
+            color: var(--dark-green);
             background-color: #f4f6f3;
-            padding: 10px;
+            padding: 12px;
             border-radius: 6px;
             border-left: 3px solid var(--sage-green);
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+
+        .promo-desc label {
+            color: var(--sage-green);
+            margin-bottom: 5px;
         }
 
         .disclaimer-zona {
@@ -330,15 +334,15 @@
                                 <option value="Tomate Cherry y Pesto">🍅 Tomate Cherry y Pesto</option>
                                 <option value="Aceitunas">🫒 Aceitunas</option>
                             </select>
-                            
-                            <select class="sabor-select-2" style="display: none; margin-top: 10px;">
-                                <option value="" disabled selected>Elegí el segundo sabor...</option>
-                                <option value="Clásica (Romero y Sal)">🌿 Clásica (Romero y Sal)</option>
-                                <option value="Papa y Parmesano">🧀 Papa y Parmesano</option>
-                                <option value="Tomate Cherry y Pesto">🍅 Tomate Cherry y Pesto</option>
-                                <option value="Aceitunas">🫒 Aceitunas</option>
-                            </select>
 
+                            <!-- Div de la promo adaptado con el select que pediste por defecto en 'Si' -->
+                            <div class="promo-desc">
+                                <label>🎁 ¡Promo del mes! Con tu Familiar llevás una Individual de Romero y Sal de regalo:</label>
+                                <select class="regalo-romero-select">
+                                    <option value="Si">Quiero la individual de romero</option>
+                                    <option value="No">No la quiero</option>
+                                </select>
+                            </div>
                         </div>
 
                         <div class="form-group" style="margin-bottom: 0;">
@@ -393,27 +397,13 @@
 
         function manejarCambioFormato(selectElement) {
             const itemContainer = selectElement.closest('.order-item');
-            const saborSelect = itemContainer.querySelector('.sabor-select');
-            const saborSelect2 = itemContainer.querySelector('.sabor-select-2');
             const promoDesc = itemContainer.querySelector('.promo-desc');
 
-            if (selectElement.value === 'Promo25') {
-                saborSelect.style.display = 'block';
-                saborSelect.setAttribute('required', 'required');
-                
-                saborSelect2.style.display = 'block';
-                saborSelect2.setAttribute('required', 'required');
-                
+            if (selectElement.value === 'Familiar') {
                 promoDesc.style.display = 'block';
             } else {
-                saborSelect.style.display = 'block';
-                saborSelect.setAttribute('required', 'required');
-                
-                saborSelect2.style.display = 'none';
-                saborSelect2.removeAttribute('required');
-                saborSelect2.value = "";
-                
                 promoDesc.style.display = 'none';
+                itemContainer.querySelector('.regalo-romero-select').value = "Si"; // Resetea a default por si vuelven a elegir Familiar
             }
             calcularTotal();
         }
@@ -429,7 +419,6 @@
                 let precioUnitario = 0;
                 if (formato === 'Individual') precioUnitario = 4200;
                 else if (formato === 'Familiar') precioUnitario = 12000;
-                else if (formato === 'Promo25') precioUnitario = 21000;
 
                 total += (precioUnitario * cantidad);
             });
@@ -448,13 +437,9 @@
             saborSelect.value = "";
             saborSelect.style.display = 'block';
             saborSelect.setAttribute('required', 'required');
-            
-            const saborSelect2 = nuevoItem.querySelector('.sabor-select-2');
-            saborSelect2.value = "";
-            saborSelect2.style.display = 'none';
-            saborSelect2.removeAttribute('required');
 
             nuevoItem.querySelector('.promo-desc').style.display = 'none';
+            nuevoItem.querySelector('.regalo-romero-select').value = "Si";
             nuevoItem.querySelector('.cantidad-select').value = "1";
 
             const btnEliminar = document.createElement('button');
@@ -487,9 +472,14 @@
                 const formato = item.querySelector('.formato-select').value;
                 let sabor = item.querySelector('.sabor-select').value;
                 
-                if (formato === 'Promo25') {
-                    const sabor2 = item.querySelector('.sabor-select-2').value;
-                    sabor = `Promo (25 de Mayo): ${sabor} + ${sabor2}`;
+                // Si es familiar y eligió que sí quiere la de regalo, la sumamos al campo sabor para que impacte limpio en tu script
+                if (formato === 'Familiar') {
+                    const quiereRegalo = item.querySelector('.regalo-romero-select').value;
+                    if (quiereRegalo === 'Si') {
+                        sabor += " (+ Individual Romero Regalo)";
+                    } else {
+                        sabor += " (Sin individual de regalo)";
+                    }
                 }
                 
                 itemsAgregados.push({
