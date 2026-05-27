@@ -6,16 +6,7 @@
     <title>Pedidos | Focaccias Artesanales</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,600&family=Montserrat:wght@300;400;600&display=swap');
-
-        :root {     
-            --sage-green: #63825D;      
-            --light-sage: #e9ece8;
-            --beige: #F7F5F0;
-            --dark-green: #2B3A28;
-            --border-color: #d1d8ce;
-            --soft-red: #C57B7B;
-        }
-
+        :root { --sage-green: #63825D; --light-sage: #e9ece8; --beige: #F7F5F0; --dark-green: #2B3A28; --border-color: #d1d8ce; --soft-red: #C57B7B; }
         body { font-family: 'Montserrat', sans-serif; background-color: var(--beige); color: var(--dark-green); margin: 0; padding: 20px; display: flex; justify-content: center; }
         .form-container { background-color: white; max-width: 500px; width: 100%; border-radius: 16px; box-shadow: 0 10px 25px rgba(99, 130, 93, 0.15); overflow: hidden; border: 1px solid var(--border-color); }
         .form-header { background-color: var(--light-sage); padding: 30px 20px; text-align: center; border-bottom: 2px solid var(--sage-green); }
@@ -28,10 +19,12 @@
         .order-section { background-color: var(--light-sage); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px dashed var(--sage-green); }
         .order-item { background-color: white; padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 15px; position: relative; }
         .remove-btn { position: absolute; top: 15px; right: 15px; color: var(--soft-red); font-size: 18px; cursor: pointer; background: none; border: none; padding: 0; line-height: 1; }
-        .disclaimer-zona { font-size: 12px; color: var(--sage-green); margin-top: 8px; font-style: italic; }
-        .add-item-btn { width: 100%; background-color: transparent; color: var(--sage-green); border: 1px dashed var(--sage-green); padding: 12px; font-weight: 600; border-radius: 8px; cursor: pointer; margin-bottom: 10px; }
+        .add-item-btn { width: 100%; background-color: transparent; color: var(--sage-green); border: 1px dashed var(--sage-green); padding: 12px; font-size: 14px; font-weight: 600; border-radius: 8px; cursor: pointer; margin-bottom: 10px; }
         .total-price { font-size: 18px; font-weight: 600; text-align: right; margin-top: 15px; color: var(--dark-green); }
-        button[type="submit"] { width: 100%; background-color: var(--sage-green); color: white; border: none; padding: 15px; font-weight: 600; border-radius: 8px; cursor: pointer; }
+        button[type="submit"] { width: 100%; background-color: var(--sage-green); color: white; border: none; padding: 15px; font-size: 16px; font-weight: 600; border-radius: 8px; cursor: pointer; font-family: 'Montserrat', sans-serif; margin-top: 10px; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(43, 58, 40, 0.7); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-box { background-color: var(--beige); width: 85%; max-width: 350px; padding: 40px 30px; border-radius: 16px; text-align: center; border: 2px solid var(--sage-green); }
+        .modal-btn { background-color: var(--sage-green); color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; width: 100%; font-family: 'Montserrat', sans-serif; }
     </style>
 </head>
 <body>
@@ -43,11 +36,11 @@
         <form id="pedidoForm">
             <div class="form-group">
                 <label for="nombre">Nombre y Apellido</label>
-                <input type="text" id="nombre" name="nombre" required>
+                <input type="text" id="nombre" name="nombre" required placeholder="Ej: María Pérez">
             </div>
             <div class="form-group">
                 <label for="telefono">Teléfono (WhatsApp)</label>
-                <input type="tel" id="telefono" name="telefono" required>
+                <input type="tel" id="telefono" name="telefono" required placeholder="Ej: 1123456789">
             </div>
             <div class="form-group">
                 <label for="zona">Zona de entrega</label>
@@ -60,7 +53,6 @@
                     <option value="Barrio de Villa Nueva">Barrio de Villa Nueva</option>
                     <option value="Otro">Otro</option>
                 </select>
-                <p class="disclaimer-zona">⚠️ Importante: Las entregas están sujetas a coordinación.</p>
                 <div id="barrioEspecificoContainer" style="display: none; margin-top: 10px;">
                     <input type="text" id="barrioEspecifico" name="barrioEspecifico" placeholder="¿Dónde?">
                 </div>
@@ -76,7 +68,7 @@
                                 <option value="Familiar">Familiar (31x21) - $12.000</option>
                             </select>
                         </div>
-                        <div class="form-group">
+                        <div class="form-group sabor-group">
                             <label>Sabor</label>
                             <select class="sabor-select" required>
                                 <option value="" disabled selected>Elegí un sabor...</option>
@@ -85,18 +77,17 @@
                                 <option value="Tomate Cherry y Pesto">🍅 Tomate Cherry y Pesto</option>
                                 <option value="Aceitunas">🫒 Aceitunas</option>
                             </select>
+                            <div class="promo-romero" style="display: none; margin-top: 10px;">
+                                <label style="color: var(--sage-green);">🎁 ¿Querés tu individual de Romero de regalo?</label>
+                                <select class="regalo-select">
+                                    <option value="Si">Sí, quiero la de regalo</option>
+                                    <option value="No">No, gracias</option>
+                                </select>
+                            </div>
                         </div>
-                        <!-- NUEVA OPCIÓN DE REGALO -->
-                        <div class="promo-romero" style="display: none; margin-bottom: 15px;">
-                            <label style="color: var(--sage-green);">🎁 ¿Querés la individual de Romero de regalo?</label>
-                            <select class="regalo-romero">
-                                <option value="Si">Sí, quiero la individual de regalo</option>
-                                <option value="No">No, gracias</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
+                        <div class="form-group" style="margin-bottom: 0;">
                             <label>Cantidad</label>
-                            <select class="cantidad-select" onchange="calcularTotal()">
+                            <select class="cantidad-select" required onchange="calcularTotal()">
                                 <option value="1">1</option><option value="2">2</option>
                                 <option value="3">3</option><option value="4">4</option>
                             </select>
@@ -106,48 +97,67 @@
                 <button type="button" class="add-item-btn" onclick="agregarItem()">+ Agregar otro producto</button>
                 <div class="total-price" id="totalTexto">Total: $0</div>
             </div>
+            <div class="form-group">
+                <label for="aclaraciones">Aclaraciones adicionales (Opcional)</label>
+                <textarea id="aclaraciones" name="aclaraciones"></textarea>
+            </div>
             <button type="submit">Confirmar Pedido</button>
         </form>
     </div>
-
+    <div id="modalExito" class="modal-overlay">
+        <div class="modal-box">
+            <h2>¡Pedido Confirmado!</h2>
+            <button class="modal-btn" onclick="cerrarModal()">Cerrar</button>
+        </div>
+    </div>
     <script>
-        function manejarCambioZona(el) {
-            const container = document.getElementById('barrioEspecificoContainer');
-            container.style.display = (el.value === 'Barrio de Villa Nueva' || el.value === 'Otro') ? 'block' : 'none';
-        }
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwyEqACgr_6WvgtoaadV1cuqzzL287U8jg1WIeYT7ZZ75iErr_DewTkaNBokh9fxRcM/exec";
 
-        function manejarCambioFormato(el) {
-            const container = el.closest('.order-item');
-            container.querySelector('.promo-romero').style.display = (el.value === 'Familiar') ? 'block' : 'none';
+        function manejarCambioZona(s) {
+            const c = document.getElementById('barrioEspecificoContainer');
+            c.style.display = (s.value === 'Barrio de Villa Nueva' || s.value === 'Otro') ? 'block' : 'none';
+        }
+        function manejarCambioFormato(s) {
+            const item = s.closest('.order-item');
+            item.querySelector('.promo-romero').style.display = (s.value === 'Familiar') ? 'block' : 'none';
             calcularTotal();
         }
-
         function calcularTotal() {
             let total = 0;
             document.querySelectorAll('.order-item').forEach(item => {
                 const f = item.querySelector('.formato-select').value;
                 const cant = parseInt(item.querySelector('.cantidad-select').value) || 1;
-                let precio = (f === 'Individual') ? 4200 : (f === 'Familiar' ? 12000 : 0);
-                total += (precio * cant);
+                total += ((f === 'Individual' ? 4200 : (f === 'Familiar' ? 12000 : 0)) * cant);
             });
             document.getElementById('totalTexto').innerText = "Total: $" + total.toLocaleString('es-AR');
         }
-
         function agregarItem() {
-            const container = document.getElementById('items-container');
-            const nuevo = container.querySelector('.order-item').cloneNode(true);
-            const btn = document.createElement('button');
-            btn.className = 'remove-btn'; btn.innerHTML = '✖';
+            const cont = document.getElementById('items-container');
+            const nuevo = cont.querySelector('.order-item').cloneNode(true);
+            const btn = document.createElement('button'); btn.className = 'remove-btn'; btn.innerHTML = '✖';
             btn.onclick = () => { nuevo.remove(); calcularTotal(); };
-            nuevo.appendChild(btn);
-            container.appendChild(nuevo);
+            nuevo.appendChild(btn); cont.appendChild(nuevo);
         }
+        function cerrarModal() { document.getElementById('modalExito').style.display = 'none'; window.location.reload(); }
 
         document.getElementById('pedidoForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            // ... (AQUÍ VA TU LÓGICA DE ENVÍO ORIGINAL, SOLO ASEGURATE DE LEER EL REGALO)
-            // Ejemplo de lectura: item.querySelector('.regalo-romero').value
-            alert("Pedido enviado");
+            const items = [];
+            document.querySelectorAll('.order-item').forEach(item => {
+                let s = item.querySelector('.sabor-select').value;
+                if(item.querySelector('.formato-select').value === 'Familiar' && item.querySelector('.regalo-select').value === 'Si') {
+                    s += " (+ Individual de regalo)";
+                }
+                items.push({ formato: item.querySelector('.formato-select').value, sabor: s, cantidad: item.querySelector('.cantidad-select').value });
+            });
+            const data = { 
+                nombre: document.getElementById('nombre').value, 
+                telefono: document.getElementById('telefono').value, 
+                items: items, 
+                total: document.getElementById('totalTexto').innerText 
+            };
+            fetch(GOOGLE_SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
+            .then(() => { document.getElementById('modalExito').style.display = 'flex'; });
         });
     </script>
 </body>
