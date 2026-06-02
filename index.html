@@ -419,7 +419,7 @@
         }
 
         function actualizarPromoSelect(orderItem, formato) {
-            const promoDiv    = orderItem.querySelector('.promo-desc');
+            const promoDiv    = orderItem.querySelector('.promo-desc:not(.formato-info-card)');
             const promoSelect = orderItem.querySelector('.promo-select');
             if (!promoDiv || !promoSelect) return;
 
