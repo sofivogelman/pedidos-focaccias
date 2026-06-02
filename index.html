@@ -413,6 +413,7 @@
 
         function promosParaFormato(formato) {
             return PROMOS_ACTIVAS.filter(p => {
+                if (p.esFormato) return false;
                 if (!p.items || p.items.length === 0) return true;
                 return p.items.some(it => (it.format || '').toLowerCase() === (formato || '').toLowerCase());
             });
