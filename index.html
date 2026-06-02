@@ -8,8 +8,8 @@
         /* Tipografías elegantes */
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,600&family=Montserrat:wght@300;400;600&display=swap');
 
-        :root {     
-            --sage-green: #63825D;      
+        :root {
+            --sage-green: #63825D;
             --light-sage: #e9ece8;
             --beige: #F7F5F0;
             --dark-green: #2B3A28;
@@ -305,9 +305,9 @@
                     <option value="Barrio de Villa Nueva">Barrio de Villa Nueva</option>
                     <option value="Otro">Otro</option>
                 </select>
-                
+
                 <p class="disclaimer-zona">⚠️ Importante: Las entregas están sujetas a coordinación previa de días y horarios.</p>
-                
+
                 <div id="barrioEspecificoContainer" style="display: none; margin-top: 10px;">
                     <input type="text" id="barrioEspecifico" name="barrioEspecifico" placeholder="¿Dónde? (Ej: San Isidro Labrador u otra zona)">
                 </div>
@@ -335,12 +335,11 @@
                                 <option value="Aceitunas">🫒 Aceitunas</option>
                             </select>
 
-                            <!-- Div de la promo adaptado con el select que pediste por defecto en 'Si' -->
+                            <!-- Promo dinámica: se llena desde el panel -->
                             <div class="promo-desc">
-                                <label>🎁 ¡Promo del mes! Con tu Familiar llevás una Individual de Romero y Sal de regalo:</label>
-                                <select class="regalo-romero-select">
-                                    <option value="Si">Quiero la individual de romero</option>
-                                    <option value="No">No la quiero</option>
+                                <label>🎁 Promo disponible:</label>
+                                <select class="promo-select" onchange="calcularTotal()">
+                                    <option value="">Sin promo</option>
                                 </select>
                             </div>
                         </div>
@@ -356,7 +355,7 @@
                 </div>
 
                 <button type="button" class="add-item-btn" onclick="agregarItem()">+ Agregar otro producto</button>
-                
+
                 <div class="total-price" id="totalTexto">Total: $0</div>
             </div>
 
@@ -381,6 +380,53 @@
     <script>
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzMcf4pCj2zwG3VzOkBPJsaLZkqmzqm6iRZyq7D5H6WA6HaTWJbYL_0q8vC-koL4MYy/exec";
 
+        // ─── Promos dinámicas desde el panel ──────────────────────────────────
+        const PROMOS_URL = "https://raw.githubusercontent.com/sofivogelman/focacciapanel/main/promos.json";
+        let PROMOS_ACTIVAS = [];
+
+        async function cargarPromos() {
+            try {
+                const data = await fetch(PROMOS_URL + '?t=' + Date.now()).then(r => r.json());
+                PROMOS_ACTIVAS = (data.promos || []).filter(p => p.active);
+                document.querySelectorAll('.order-item').forEach(item => {
+                    const fmt = item.querySelector('.formato-select').value;
+                    if (fmt) actualizarPromoSelect(item, fmt);
+                });
+            } catch (e) {
+                console.warn('No se pudieron cargar las promos:', e);
+            }
+        }
+
+        function promosParaFormato(formato) {
+            return PROMOS_ACTIVAS.filter(p => {
+                if (!p.items || p.items.length === 0) return true;
+                return p.items.some(it => (it.format || '').toLowerCase() === (formato || '').toLowerCase());
+            });
+        }
+
+        function actualizarPromoSelect(orderItem, formato) {
+            const promoDiv    = orderItem.querySelector('.promo-desc');
+            const promoSelect = orderItem.querySelector('.promo-select');
+            if (!promoDiv || !promoSelect) return;
+
+            const promos = promosParaFormato(formato);
+            if (!promos.length) {
+                promoDiv.style.display = 'none';
+                promoSelect.value = '';
+                return;
+            }
+
+            promoSelect.innerHTML = '<option value="">Sin promo</option>' +
+                promos.map(function(p) {
+                    var precio = p.price > 0 ? ' (+$' + p.price.toLocaleString('es-AR') + ')' : ' (incluida)';
+                    var desc   = p.tipo ? p.name + ' — ' + p.tipo + precio : p.name + precio;
+                    return '<option value="' + p.name + '">' + desc + '</option>';
+                }).join('');
+
+            promoDiv.style.display = 'block';
+        }
+        // ──────────────────────────────────────────────────────────────────────
+
         function manejarCambioZona(selectElement) {
             const container = document.getElementById('barrioEspecificoContainer');
             const input = document.getElementById('barrioEspecifico');
@@ -391,36 +437,35 @@
             } else {
                 container.style.display = 'none';
                 input.removeAttribute('required');
-                input.value = ''; 
+                input.value = '';
             }
         }
 
         function manejarCambioFormato(selectElement) {
-            const itemContainer = selectElement.closest('.order-item');
-            const promoDesc = itemContainer.querySelector('.promo-desc');
-
-            if (selectElement.value === 'Familiar') {
-                promoDesc.style.display = 'block';
-            } else {
-                promoDesc.style.display = 'none';
-                itemContainer.querySelector('.regalo-romero-select').value = "Si"; // Resetea a default por si vuelven a elegir Familiar
-            }
+            const item = selectElement.closest('.order-item');
+            actualizarPromoSelect(item, selectElement.value);
             calcularTotal();
         }
 
         function calcularTotal() {
             let total = 0;
             const items = document.querySelectorAll('.order-item');
-            
-            items.forEach(item => {
-                const formato = item.querySelector('.formato-select').value;
-                const cantidad = parseInt(item.querySelector('.cantidad-select').value) || 1;
-                
+
+            items.forEach(function(item) {
+                const formato   = item.querySelector('.formato-select').value;
+                const cantidad  = parseInt(item.querySelector('.cantidad-select').value) || 1;
+                const promoVal  = item.querySelector('.promo-select') ? item.querySelector('.promo-select').value : '';
+
                 let precioUnitario = 0;
                 if (formato === 'Individual') precioUnitario = 4200;
                 else if (formato === 'Familiar') precioUnitario = 12000;
 
                 total += (precioUnitario * cantidad);
+
+                if (promoVal) {
+                    var promo = PROMOS_ACTIVAS.find(function(p) { return p.name === promoVal; });
+                    if (promo && promo.price > 0) total += promo.price * cantidad;
+                }
             });
 
             document.getElementById('totalTexto').innerText = total > 0 ? "Total: $" + total.toLocaleString('es-AR') : "Total: $0";
@@ -430,16 +475,17 @@
             const container = document.getElementById('items-container');
             const primerItem = container.querySelector('.order-item');
             const nuevoItem = primerItem.cloneNode(true);
-            
+
             nuevoItem.querySelector('.formato-select').value = "";
-            
+
             const saborSelect = nuevoItem.querySelector('.sabor-select');
             saborSelect.value = "";
             saborSelect.style.display = 'block';
             saborSelect.setAttribute('required', 'required');
 
             nuevoItem.querySelector('.promo-desc').style.display = 'none';
-            nuevoItem.querySelector('.regalo-romero-select').value = "Si";
+            var promoSel = nuevoItem.querySelector('.promo-select');
+            if (promoSel) promoSel.innerHTML = '<option value="">Sin promo</option>';
             nuevoItem.querySelector('.cantidad-select').value = "1";
 
             const btnEliminar = document.createElement('button');
@@ -457,34 +503,27 @@
 
         function cerrarModal() {
             document.getElementById('modalExito').style.display = 'none';
-            window.location.reload(); 
+            window.location.reload();
         }
 
         document.getElementById('pedidoForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            
+
             const submitBtn = this.querySelector('button[type="submit"]');
             submitBtn.innerText = 'Enviando...';
             submitBtn.disabled = true;
 
             const itemsAgregados = [];
-            document.querySelectorAll('.order-item').forEach(item => {
-                const formato = item.querySelector('.formato-select').value;
-                let sabor = item.querySelector('.sabor-select').value;
-                
-                // Si es familiar y eligió que sí quiere la de regalo, la sumamos al campo sabor para que impacte limpio en tu script
-                if (formato === 'Familiar') {
-                    const quiereRegalo = item.querySelector('.regalo-romero-select').value;
-                    if (quiereRegalo === 'Si') {
-                        sabor += " (+ Individual Romero Regalo)";
-                    } else {
-                        sabor += " (Sin individual de regalo)";
-                    }
-                }
-                
+            document.querySelectorAll('.order-item').forEach(function(item) {
+                const formato  = item.querySelector('.formato-select').value;
+                let   sabor    = item.querySelector('.sabor-select').value;
+                const promoVal = item.querySelector('.promo-select') ? item.querySelector('.promo-select').value : '';
+
+                if (promoVal) sabor += ' (+ ' + promoVal + ')';
+
                 itemsAgregados.push({
-                    formato: formato,
-                    sabor: sabor,
+                    formato:  formato,
+                    sabor:    sabor,
                     cantidad: item.querySelector('.cantidad-select').value
                 });
             });
@@ -493,17 +532,17 @@
             let zonaFinal = zonaSeleccionada;
             if (zonaSeleccionada === 'Barrio de Villa Nueva' || zonaSeleccionada === 'Otro') {
                 const barrio = document.getElementById('barrioEspecifico').value;
-                zonaFinal = zonaSeleccionada + " - " + barrio; 
+                zonaFinal = zonaSeleccionada + " - " + barrio;
             }
 
             const data = {
-                nombre: document.getElementById('nombre').value,
-                telefono: document.getElementById('telefono').value,
-                zona: zonaFinal, 
-                dia: "A coordinar",
+                nombre:       document.getElementById('nombre').value,
+                telefono:     document.getElementById('telefono').value,
+                zona:         zonaFinal,
+                dia:          "A coordinar",
                 aclaraciones: document.getElementById('aclaraciones').value,
-                total: document.getElementById('totalTexto').innerText.replace("Total: ", ""),
-                items: itemsAgregados
+                total:        document.getElementById('totalTexto').innerText.replace("Total: ", ""),
+                items:        itemsAgregados
             };
 
             fetch(GOOGLE_SCRIPT_URL, {
@@ -513,17 +552,19 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             })
-            .then(() => {
+            .then(function() {
                 document.getElementById('modalExito').style.display = 'flex';
                 submitBtn.innerText = 'Confirmar Pedido';
                 submitBtn.disabled = false;
             })
-            .catch(error => {
+            .catch(function(error) {
                 alert('Hubo un error. Por favor, revisá tu conexión y volvé a intentar.');
                 submitBtn.innerText = 'Confirmar Pedido';
                 submitBtn.disabled = false;
             });
         });
+
+        cargarPromos();
     </script>
 </body>
 </html>
