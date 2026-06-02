@@ -387,9 +387,23 @@
         async function cargarPromos() {
             try {
                 const data = await fetch(PROMOS_URL + '?t=' + Date.now()).then(r => r.json());
-                PROMOS_ACTIVAS = (data.promos || []).filter(p => p.active);
-                document.querySelectorAll('.order-item').forEach(item => {
-                    const fmt = item.querySelector('.formato-select').value;
+                PROMOS_ACTIVAS = (data.promos || []).filter(function(p) { return p.active; });
+
+                // Agregar promos con esFormato como opciones de formato
+                var promosFormato = PROMOS_ACTIVAS.filter(function(p) { return p.esFormato; });
+                document.querySelectorAll('.formato-select').forEach(function(sel) {
+                    sel.querySelectorAll('.promo-formato-opt').forEach(function(o) { o.remove(); });
+                    promosFormato.forEach(function(p) {
+                        var opt = document.createElement('option');
+                        opt.value     = p.name;
+                        opt.className = 'promo-formato-opt';
+                        opt.textContent = p.name + (p.price ? ' - $' + p.price.toLocaleString('es-AR') : '');
+                        sel.appendChild(opt);
+                    });
+                });
+
+                document.querySelectorAll('.order-item').forEach(function(item) {
+                    var fmt = item.querySelector('.formato-select').value;
                     if (fmt) actualizarPromoSelect(item, fmt);
                 });
             } catch (e) {
@@ -442,8 +456,44 @@
         }
 
         function manejarCambioFormato(selectElement) {
-            const item = selectElement.closest('.order-item');
-            actualizarPromoSelect(item, selectElement.value);
+            var item        = selectElement.closest('.order-item');
+            var formato     = selectElement.value;
+            var promoFmt    = PROMOS_ACTIVAS.find(function(p) { return p.esFormato && p.name === formato; });
+            var saborGroup  = item.querySelector('.sabor-group');
+            var infoCard    = item.querySelector('.formato-info-card');
+
+            if (!infoCard) {
+                infoCard = document.createElement('div');
+                infoCard.className = 'formato-info-card promo-desc';
+                infoCard.style.display = 'none';
+                selectElement.closest('.form-group').after(infoCard);
+            }
+
+            if (promoFmt) {
+                // Ocultar sabor, mostrar tarjeta descriptiva
+                if (saborGroup) {
+                    saborGroup.style.display = 'none';
+                    saborGroup.querySelectorAll('select').forEach(function(s) { s.removeAttribute('required'); });
+                }
+                var desc = promoFmt.notes || promoFmt.tipo || '';
+                infoCard.innerHTML =
+                    '<label>🎁 ' + promoFmt.name + '</label>' +
+                    (desc ? '<p style="margin:6px 0 0 0;font-size:13px;color:var(--dark-green)">' + desc + '</p>' : '') +
+                    (promoFmt.price ? '<p style="margin:6px 0 0 0;font-weight:600">Precio: $' + promoFmt.price.toLocaleString('es-AR') + '</p>' : '');
+                infoCard.style.display = 'block';
+                // Ocultar promo dropdown normal
+                var promoDiv = item.querySelector('.promo-desc:not(.formato-info-card)');
+                if (promoDiv) promoDiv.style.display = 'none';
+            } else {
+                // Mostrar sabor, ocultar tarjeta
+                if (saborGroup) {
+                    saborGroup.style.display = 'block';
+                    var saborSel = saborGroup.querySelector('.sabor-select');
+                    if (saborSel) saborSel.setAttribute('required', 'required');
+                }
+                infoCard.style.display = 'none';
+                actualizarPromoSelect(item, formato);
+            }
             calcularTotal();
         }
 
@@ -455,10 +505,16 @@
                 const formato   = item.querySelector('.formato-select').value;
                 const cantidad  = parseInt(item.querySelector('.cantidad-select').value) || 1;
                 const promoVal  = item.querySelector('.promo-select') ? item.querySelector('.promo-select').value : '';
+                const promoFmt  = PROMOS_ACTIVAS.find(function(p) { return p.esFormato && p.name === formato; });
 
                 let precioUnitario = 0;
-                if (formato === 'Individual') precioUnitario = 4200;
-                else if (formato === 'Familiar') precioUnitario = 12000;
+                if (promoFmt) {
+                    precioUnitario = promoFmt.price || 0;
+                } else if (formato === 'Individual') {
+                    precioUnitario = 4200;
+                } else if (formato === 'Familiar') {
+                    precioUnitario = 12000;
+                }
 
                 total += (precioUnitario * cantidad);
 
@@ -516,10 +572,11 @@
             const itemsAgregados = [];
             document.querySelectorAll('.order-item').forEach(function(item) {
                 const formato  = item.querySelector('.formato-select').value;
-                let   sabor    = item.querySelector('.sabor-select').value;
+                const promoFmt = PROMOS_ACTIVAS.find(function(p) { return p.esFormato && p.name === formato; });
+                let   sabor    = promoFmt ? (promoFmt.tipo || promoFmt.name) : item.querySelector('.sabor-select').value;
                 const promoVal = item.querySelector('.promo-select') ? item.querySelector('.promo-select').value : '';
 
-                if (promoVal) sabor += ' (+ ' + promoVal + ')';
+                if (!promoFmt && promoVal) sabor += ' (+ ' + promoVal + ')';
 
                 itemsAgregados.push({
                     formato:  formato,
