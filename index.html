@@ -320,8 +320,9 @@
                             <label>Formato</label>
                             <select class="formato-select" required onchange="manejarCambioFormato(this)">
                                 <option value="" disabled selected>Elegí una opción...</option>
-                                <option value="Individual">Individual (15x12) - $4.200</option>
-                                <option value="Familiar">Familiar (31x21) - $12.000</option>
+                                <option value="Enzo">Enzo (15×12 cm) — $4.200</option>
+                                <option value="Dibu">Dibu (17×13 cm) — $8.000</option>
+                                <option value="Messi">Messi (31×21 cm) — $12.000</option>
                             </select>
                         </div>
 
@@ -511,9 +512,11 @@
                 let precioUnitario = 0;
                 if (promoFmt) {
                     precioUnitario = promoFmt.price || 0;
-                } else if (formato === 'Individual') {
+                } else if (formato === 'Enzo') {
                     precioUnitario = 4200;
-                } else if (formato === 'Familiar') {
+                } else if (formato === 'Dibu') {
+                    precioUnitario = 8000;
+                } else if (formato === 'Messi') {
                     precioUnitario = 12000;
                 }
 
