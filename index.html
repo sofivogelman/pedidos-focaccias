@@ -6,15 +6,19 @@
     <title>Pedidos | Focaccias Artesanales</title>
     <style>
         /* Tipografías elegantes */
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,600&family=Montserrat:wght@300;400;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,600&family=Montserrat:wght@300;400;600&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap');
 
         :root {
-            --sage-green: #63825D;
-            --light-sage: #e9ece8;
-            --beige: #F7F5F0;
-            --dark-green: #2B3A28;
-            --border-color: #d1d8ce;
-            --soft-red: #C57B7B;
+            --sage-green: #1A7A8C;
+            --light-sage: #DFF0F4;
+            --beige: #F5F0E8;
+            --dark-green: #1A2A32;
+            --border-color: #D6C9B0;
+            --soft-red: #8A3A32;
+            --gold: #C4921F;
+            --gold-light: #F7EDDA;
+            --teal: #1A7A8C;
+            --teal-dark: #145F6E;
         }
 
         body {
@@ -32,7 +36,7 @@
             max-width: 500px;
             width: 100%;
             border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(99, 130, 93, 0.15);
+            box-shadow: 0 10px 25px rgba(26, 122, 140, 0.12); border-top: 3px solid var(--gold);
             overflow: hidden;
             border: 1px solid var(--border-color);
         }
@@ -41,7 +45,7 @@
             background-color: var(--light-sage);
             padding: 30px 20px;
             text-align: center;
-            border-bottom: 2px solid var(--sage-green);
+            border-bottom: 2px solid var(--gold);
         }
 
         .form-header svg {
@@ -49,8 +53,9 @@
         }
 
         .form-header h1 {
-            font-family: 'Playfair Display', serif;
-            font-size: 28px;
+            font-family: 'Cormorant Garamond', 'Playfair Display', serif;
+            font-size: 32px;
+            font-weight: 600;
             margin: 0;
             color: var(--dark-green);
         }
@@ -99,8 +104,8 @@
         select:focus,
         textarea:focus {
             outline: none;
-            border-color: var(--sage-green);
-            box-shadow: 0 0 0 3px rgba(99, 130, 93, 0.2);
+            border-color: var(--teal);
+            box-shadow: 0 0 0 3px rgba(26, 122, 140, 0.2);
             background-color: white;
         }
 
@@ -143,10 +148,10 @@
             display: none;
             font-size: 13px;
             color: var(--dark-green);
-            background-color: #f4f6f3;
+            background-color: var(--gold-light);
             padding: 12px;
             border-radius: 6px;
-            border-left: 3px solid var(--sage-green);
+            border-left: 3px solid var(--teal);
             margin-top: 10px;
             margin-bottom: 10px;
         }
@@ -180,7 +185,7 @@
         }
 
         .add-item-btn:hover {
-            background-color: rgba(99, 130, 93, 0.1);
+            background-color: rgba(26, 122, 140, 0.1);
         }
 
         .total-price {
@@ -207,7 +212,7 @@
         }
 
         button[type="submit"]:hover {
-            background-color: #516b4c;
+            background-color: var(--teal-dark);
         }
 
         .modal-overlay {
@@ -217,7 +222,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(43, 58, 40, 0.7);
+            background-color: rgba(26, 42, 50, 0.75);
             z-index: 1000;
             justify-content: center;
             align-items: center;
@@ -273,11 +278,11 @@
     <div class="form-container">
         <div class="form-header">
             <svg width="40" height="40" viewBox="0 0 100 100">
-                <path d="M50,90 Q45,50 55,10" stroke="#63825D" stroke-width="3" fill="none"/>
-                <ellipse cx="52" cy="70" rx="4" ry="12" fill="#63825D" transform="rotate(30 52 70)"/>
-                <ellipse cx="48" cy="55" rx="4" ry="12" fill="#63825D" transform="rotate(-30 48 55)"/>
-                <ellipse cx="54" cy="40" rx="4" ry="12" fill="#63825D" transform="rotate(25 54 40)"/>
-                <ellipse cx="46" cy="25" rx="4" ry="12" fill="#63825D" transform="rotate(-25 46 25)"/>
+                <path d="M50,90 Q45,50 55,10" stroke="#1A7A8C" stroke-width="3" fill="none"/>
+                <ellipse cx="52" cy="70" rx="4" ry="12" fill="#1A7A8C" transform="rotate(30 52 70)"/>
+                <ellipse cx="48" cy="55" rx="4" ry="12" fill="#1A7A8C" transform="rotate(-30 48 55)"/>
+                <ellipse cx="54" cy="40" rx="4" ry="12" fill="#1A7A8C" transform="rotate(25 54 40)"/>
+                <ellipse cx="46" cy="25" rx="4" ry="12" fill="#1A7A8C" transform="rotate(-25 46 25)"/>
             </svg>
             <h1>Hacé tu pedido</h1>
             <p>Focaccias Artesanales</p>
