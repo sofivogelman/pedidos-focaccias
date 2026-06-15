@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+﻿﻿<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -390,8 +390,8 @@
         // ─── Promos dinámicas desde el panel ──────────────────────────────────
         const PROMOS_URL = "https://raw.githubusercontent.com/sofivogelman/focacciapanel/main/promos.json";
         let PROMOS_ACTIVAS = [
-            { id: 4, name: "Box Mundialista ⚽", tipo: "Combo Mundialista", price: 30000, notes: "Para dos. Dos focaccias Enzo a tu elección, una picada para compartir y un Malbec.", active: true, esFormato: true },
-            { id: 5, name: "La Previa 🍷",       tipo: "Combo Mundialista", price: 20000, notes: "Una Messi artesanal a tu elección y un Malbec. Edición especial Mundial 2026.",       active: true, esFormato: true }
+            { id: 4, name: "Box Mundialista ⚽", tipo: "Combo Mundialista", price: 30000, notes: "Para dos. Dos focaccias Enzo a tu elección, una picada para compartir y un Malbec.", active: true, esFormato: true, items: [{format:"Enzo",qty:2}] },
+            { id: 5, name: "La Previa 🍷",       tipo: "Combo Mundialista", price: 20000, notes: "Una Messi artesanal a tu elección y un Malbec. Edición especial Mundial 2026.",       active: true, esFormato: true, items: [{format:"Messi",qty:1}] }
         ];
 
         async function cargarPromos() {
@@ -469,18 +469,38 @@
             }
 
             if (promoFmt) {
-                // Ocultar sabor, mostrar tarjeta descriptiva
                 if (saborGroup) {
                     saborGroup.style.display = 'none';
                     saborGroup.querySelectorAll('select').forEach(function(s) { s.removeAttribute('required'); });
                 }
                 var desc = promoFmt.notes || promoFmt.tipo || '';
+                var saboresOptions = '<option value="" disabled selected>Elegí un sabor...</option>' +
+                    '<option value="Clasica (Romero y Sal)">Clasica (Romero y Sal)</option>' +
+                    '<option value="Papa y Parmesano">Papa y Parmesano</option>' +
+                    '<option value="Tomate Cherry y Pesto">Tomate Cherry y Pesto</option>' +
+                    '<option value="Aceitunas">Aceitunas</option>';
+                var saboresHTML = '';
+                if (promoFmt.items && promoFmt.items.length > 0) {
+                    var totalFocaccias = promoFmt.items.reduce(function(t,i){return t+i.qty;},0);
+                    var idx = 0;
+                    promoFmt.items.forEach(function(pi) {
+                        for (var q = 0; q < pi.qty; q++) {
+                            idx++;
+                            var lbl = totalFocaccias > 1
+                                ? 'Sabor ' + pi.format + ' #' + idx
+                                : 'Sabor de tu ' + pi.format;
+                            saboresHTML += '<div class="form-group" style="margin-top:10px">' +
+                                '<label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;color:var(--dark-navy)">' + lbl + '</label>' +
+                                '<select class="promo-sabor-select" required onchange="calcularTotal()">' +
+                                saboresOptions + '</select></div>';
+                        }
+                    });
+                }
                 infoCard.innerHTML =
-                    '<label>🎁 ' + promoFmt.name + '</label>' +
-                    (desc ? '<p style="margin:6px 0 0 0;font-size:13px;color:var(--dark-green)">' + desc + '</p>' : '') +
-                    (promoFmt.price ? '<p style="margin:6px 0 0 0;font-weight:600">Precio: $' + promoFmt.price.toLocaleString('es-AR') + '</p>' : '');
+                    '<label>Combo</label>' +
+                    (desc ? '<p style="margin:6px 0 4px 0;font-size:13px;color:var(--dark-navy)">' + desc + '</p>' : '') +
+                    saboresHTML;
                 infoCard.style.display = 'block';
-                // Ocultar promo dropdown normal
                 var promoDiv = item.querySelector('.promo-desc:not(.formato-info-card)');
                 if (promoDiv) promoDiv.style.display = 'none';
             } else {
@@ -535,12 +555,20 @@
 
             nuevoItem.querySelector('.formato-select').value = "";
 
-            const saborSelect = nuevoItem.querySelector('.sabor-select');
-            saborSelect.value = "";
-            saborSelect.style.display = 'block';
-            saborSelect.setAttribute('required', 'required');
+            // Resetear sabor group
+            const saborGroup = nuevoItem.querySelector('.sabor-group');
+            if (saborGroup) {
+                saborGroup.style.display = 'block';
+                const saborSel = saborGroup.querySelector('.sabor-select');
+                if (saborSel) { saborSel.value = ""; saborSel.setAttribute('required', 'required'); }
+            }
 
-            nuevoItem.querySelector('.promo-desc').style.display = 'none';
+            // Eliminar info card clonada
+            const existingCard = nuevoItem.querySelector('.formato-info-card');
+            if (existingCard) existingCard.remove();
+
+            const promoDesc = nuevoItem.querySelector('.promo-desc');
+            if (promoDesc) promoDesc.style.display = 'none';
             var promoSel = nuevoItem.querySelector('.promo-select');
             if (promoSel) promoSel.innerHTML = '<option value="">Sin promo</option>';
             nuevoItem.querySelector('.cantidad-select').value = "1";
@@ -577,7 +605,13 @@
                 let   sabor    = promoFmt ? (promoFmt.tipo || promoFmt.name) : item.querySelector('.sabor-select').value;
                 const promoVal = item.querySelector('.promo-select') ? item.querySelector('.promo-select').value : '';
 
-                if (!promoFmt && promoVal) sabor += ' (+ ' + promoVal + ')';
+                if (promoFmt) {
+                    var promoSabores = Array.from(item.querySelectorAll('.promo-sabor-select'))
+                        .map(function(s) { return s.value; }).filter(Boolean);
+                    if (promoSabores.length) sabor += ' (' + promoSabores.join(' / ') + ')';
+                } else if (promoVal) {
+                    sabor += ' (+ ' + promoVal + ')';
+                }
 
                 itemsAgregados.push({
                     formato:  formato,
@@ -626,4 +660,5 @@
     </script>
 </body>
 </html>
+
 
