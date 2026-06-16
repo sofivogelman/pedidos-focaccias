@@ -390,8 +390,8 @@
         // ─── Promos dinámicas desde el panel ──────────────────────────────────
         const PROMOS_URL = "https://raw.githubusercontent.com/sofivogelman/focacciapanel/main/promos.json";
         let PROMOS_ACTIVAS = [
-            { id: 4, name: "Box Mundialista ⚽", tipo: "Combo Mundialista", price: 30000, notes: "Para dos. Dos focaccias Enzo a tu elección, una picada para compartir y un Malbec.", active: true, esFormato: true, items: [{format:"Enzo",qty:2}] },
-            { id: 5, name: "La Previa 🍷",       tipo: "Combo Mundialista", price: 20000, notes: "Una Messi artesanal a tu elección y un Malbec. Edición especial Mundial 2026.",       active: true, esFormato: true, items: [{format:"Messi",qty:1}] }
+            { id: 4, name: "Box Mundialista ⚽", tipo: "Combo Mundialista", price: 30000, notes: "Para dos. Incluye 2 focaccias Enzo (15×12 cm) a elección, una picada para compartir y un Malbec.", active: true, esFormato: true, items: [{format:"Enzo",qty:2}] },
+            { id: 5, name: "La Previa 🍷",       tipo: "Combo Mundialista", price: 20000, notes: "Incluye 1 focaccia Messi (31×21 cm) a elección y un Malbec. Edición especial Mundial 2026.",          active: true, esFormato: true, items: [{format:"Messi",qty:1}] }
         ];
 
         async function cargarPromos() {
@@ -475,10 +475,10 @@
                 }
                 var desc = promoFmt.notes || promoFmt.tipo || '';
                 var saboresOptions = '<option value="" disabled selected>Elegí un sabor...</option>' +
-                    '<option value="Clasica (Romero y Sal)">Clasica (Romero y Sal)</option>' +
-                    '<option value="Papa y Parmesano">Papa y Parmesano</option>' +
-                    '<option value="Tomate Cherry y Pesto">Tomate Cherry y Pesto</option>' +
-                    '<option value="Aceitunas">Aceitunas</option>';
+                    '<option value="Clásica (Romero y Sal)">🌿 Clásica (Romero y Sal)</option>' +
+                    '<option value="Papa y Parmesano">🧀 Papa y Parmesano</option>' +
+                    '<option value="Tomate Cherry y Pesto">🍅 Tomate Cherry y Pesto</option>' +
+                    '<option value="Aceitunas">🫒 Aceitunas</option>';
                 var saboresHTML = '';
                 if (promoFmt.items && promoFmt.items.length > 0) {
                     var totalFocaccias = promoFmt.items.reduce(function(t,i){return t+i.qty;},0);
@@ -497,7 +497,7 @@
                     });
                 }
                 infoCard.innerHTML =
-                    '<label>Combo</label>' +
+                    '<label style="font-weight:700;color:var(--teal)">🎁 ' + promoFmt.name + '</label>' +
                     (desc ? '<p style="margin:6px 0 4px 0;font-size:13px;color:var(--dark-navy)">' + desc + '</p>' : '') +
                     saboresHTML;
                 infoCard.style.display = 'block';
