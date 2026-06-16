@@ -397,7 +397,10 @@
         async function cargarPromos() {
             try {
                 const data = await fetch(PROMOS_URL + '?t=' + Date.now()).then(r => r.json());
-                PROMOS_ACTIVAS = (data.promos || []).filter(function(p) { return p.active; });
+                var fetched = (data.promos || []).filter(function(p) { return p.active; });
+                var esFormatoPromos = PROMOS_ACTIVAS.filter(function(p) { return p.esFormato; });
+                var normalPromos = fetched.filter(function(p) { return !p.esFormato; });
+                PROMOS_ACTIVAS = esFormatoPromos.concat(normalPromos);
 
 
                 document.querySelectorAll('.order-item').forEach(function(item) {
