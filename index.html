@@ -161,6 +161,10 @@
             margin-bottom: 5px;
         }
 
+        .sabores-checks { display: flex; flex-direction: column; gap: 10px; margin-top: 6px; }
+        .sabor-check-label { display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 14px; font-weight: 400; color: var(--dark-green); margin: 0; }
+        .sabor-check-label input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--teal); cursor: pointer; flex-shrink: 0; }
+
         .disclaimer-zona {
             font-size: 12px;
             color: var(--sage-green);
@@ -332,15 +336,14 @@
                             </select>
                         </div>
 
-                        <div class="form-group sabor-group">
-                            <label>Sabor/es</label>
-                            <select class="sabor-select" required>
-                                <option value="" disabled selected>Elegí un sabor...</option>
-                                <option value="Clásica (Romero y Sal)">🌿 Clásica (Romero y Sal)</option>
-                                <option value="Papa y Parmesano">🧀 Papa y Parmesano</option>
-                                <option value="Tomate Cherry y Pesto">🍅 Tomate Cherry y Pesto</option>
-                                <option value="Aceitunas">🫒 Aceitunas</option>
-                            </select>
+                        <div class="form-group sabor-group" style="display:none">
+                            <label>Sabor/es — elegí uno o más</label>
+                            <div class="sabores-checks">
+                                <label class="sabor-check-label"><input type="checkbox" class="sabor-check" value="Clásica (Romero y Sal)" onchange="calcularTotal()"> 🌿 Clásica (Romero y Sal)</label>
+                                <label class="sabor-check-label"><input type="checkbox" class="sabor-check" value="Papa y Parmesano" onchange="calcularTotal()"> 🧀 Papa y Parmesano</label>
+                                <label class="sabor-check-label"><input type="checkbox" class="sabor-check" value="Tomate Cherry y Pesto" onchange="calcularTotal()"> 🍅 Tomate Cherry y Pesto</label>
+                                <label class="sabor-check-label"><input type="checkbox" class="sabor-check" value="Aceitunas" onchange="calcularTotal()"> 🫒 Aceitunas</label>
+                            </div>
 
                             <!-- Promo dinámica: se llena desde el panel -->
                             <div class="promo-desc">
@@ -349,14 +352,6 @@
                                     <option value="">Sin promo</option>
                                 </select>
                             </div>
-                        </div>
-
-                        <div class="form-group" style="margin-bottom: 0;">
-                            <label>Cantidad</label>
-                            <select class="cantidad-select" required onchange="calcularTotal()">
-                                <option value="1">1</option><option value="2">2</option>
-                                <option value="3">3</option><option value="4">4</option>
-                            </select>
                         </div>
                     </div>
                 </div>
@@ -507,12 +502,7 @@
                 var promoDiv = item.querySelector('.promo-desc:not(.formato-info-card)');
                 if (promoDiv) promoDiv.style.display = 'none';
             } else {
-                // Mostrar sabor, ocultar tarjeta
-                if (saborGroup) {
-                    saborGroup.style.display = 'block';
-                    var saborSel = saborGroup.querySelector('.sabor-select');
-                    if (saborSel) saborSel.setAttribute('required', 'required');
-                }
+                if (saborGroup) saborGroup.style.display = 'block';
                 infoCard.style.display = 'none';
                 actualizarPromoSelect(item, formato);
             }
@@ -524,10 +514,10 @@
             const items = document.querySelectorAll('.order-item');
 
             items.forEach(function(item) {
-                const formato   = item.querySelector('.formato-select').value;
-                const cantidad  = parseInt(item.querySelector('.cantidad-select').value) || 1;
-                const promoVal  = item.querySelector('.promo-select') ? item.querySelector('.promo-select').value : '';
-                const promoFmt  = PROMOS_ACTIVAS.find(function(p) { return p.esFormato && p.name === formato; });
+                const formato  = item.querySelector('.formato-select').value;
+                const promoVal = item.querySelector('.promo-select') ? item.querySelector('.promo-select').value : '';
+                const promoFmt = PROMOS_ACTIVAS.find(function(p) { return p.esFormato && p.name === formato; });
+                const cantidad = promoFmt ? 1 : item.querySelectorAll('.sabor-check:checked').length;
 
                 let precioUnitario = 0;
                 if (promoFmt) {
@@ -558,12 +548,11 @@
 
             nuevoItem.querySelector('.formato-select').value = "";
 
-            // Resetear sabor group
+            // Resetear sabor group — oculto hasta elegir formato
             const saborGroup = nuevoItem.querySelector('.sabor-group');
             if (saborGroup) {
-                saborGroup.style.display = 'block';
-                const saborSel = saborGroup.querySelector('.sabor-select');
-                if (saborSel) { saborSel.value = ""; saborSel.setAttribute('required', 'required'); }
+                saborGroup.style.display = 'none';
+                saborGroup.querySelectorAll('.sabor-check').forEach(function(cb) { cb.checked = false; });
             }
 
             // Eliminar info card clonada
@@ -574,7 +563,6 @@
             if (promoDesc) promoDesc.style.display = 'none';
             var promoSel = nuevoItem.querySelector('.promo-select');
             if (promoSel) promoSel.innerHTML = '<option value="">Sin promo</option>';
-            nuevoItem.querySelector('.cantidad-select').value = "1";
 
             const btnEliminar = document.createElement('button');
             btnEliminar.type = 'button';
@@ -601,26 +589,42 @@
             submitBtn.innerText = 'Enviando...';
             submitBtn.disabled = true;
 
+            // Validar que cada formato no-promo tenga al menos un sabor
+            var itemsInvalidos = false;
+            document.querySelectorAll('.order-item').forEach(function(item) {
+                const fmt = item.querySelector('.formato-select').value;
+                if (!fmt) return;
+                const esFmt = PROMOS_ACTIVAS.find(function(p) { return p.esFormato && p.name === fmt; });
+                if (!esFmt && item.querySelectorAll('.sabor-check:checked').length === 0) {
+                    itemsInvalidos = true;
+                }
+            });
+            if (itemsInvalidos) {
+                alert('Por favor, elegí al menos un sabor para cada formato seleccionado.');
+                submitBtn.innerText = 'Confirmar Pedido';
+                submitBtn.disabled = false;
+                return;
+            }
+
             const itemsAgregados = [];
             document.querySelectorAll('.order-item').forEach(function(item) {
                 const formato  = item.querySelector('.formato-select').value;
+                if (!formato) return;
                 const promoFmt = PROMOS_ACTIVAS.find(function(p) { return p.esFormato && p.name === formato; });
-                let   sabor    = promoFmt ? (promoFmt.tipo || promoFmt.name) : item.querySelector('.sabor-select').value;
                 const promoVal = item.querySelector('.promo-select') ? item.querySelector('.promo-select').value : '';
 
                 if (promoFmt) {
+                    var sabor = promoFmt.tipo || promoFmt.name;
                     var promoSabores = Array.from(item.querySelectorAll('.promo-sabor-select'))
                         .map(function(s) { return s.value; }).filter(Boolean);
                     if (promoSabores.length) sabor += ' (' + promoSabores.join(' / ') + ')';
-                } else if (promoVal) {
-                    sabor += ' (+ ' + promoVal + ')';
+                    itemsAgregados.push({ formato: formato, sabor: sabor, cantidad: '1' });
+                } else {
+                    var checkedSabores = Array.from(item.querySelectorAll('.sabor-check:checked')).map(function(c) { return c.value; });
+                    var sabor = checkedSabores.join(' / ');
+                    if (promoVal) sabor += ' (+ ' + promoVal + ')';
+                    itemsAgregados.push({ formato: formato, sabor: sabor, cantidad: String(checkedSabores.length) });
                 }
-
-                itemsAgregados.push({
-                    formato:  formato,
-                    sabor:    sabor,
-                    cantidad: item.querySelector('.cantidad-select').value
-                });
             });
 
             const zonaSeleccionada = document.getElementById('zona').value;
