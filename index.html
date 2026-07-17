@@ -161,9 +161,15 @@
             margin-bottom: 5px;
         }
 
-        .sabores-checks { display: flex; flex-direction: column; gap: 10px; margin-top: 6px; }
-        .sabor-check-label { display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 14px; font-weight: 400; color: var(--dark-green); margin: 0; }
-        .sabor-check-label input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--teal); cursor: pointer; flex-shrink: 0; }
+        .sabores-checks { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+        .sabor-qty-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 5px 0; border-bottom: 1px solid #f0ebe0; }
+        .sabor-qty-row:last-child { border-bottom: none; }
+        .sabor-qty-label { font-size: 14px; color: var(--dark-green); flex: 1; }
+        .sabor-qty-control { display: flex; align-items: center; gap: 8px; }
+        .qty-btn { width: 30px; height: 30px; border: 1.5px solid var(--border-color); border-radius: 50%; background: white; color: var(--teal); font-size: 18px; cursor: pointer; line-height: 1; padding: 0; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .qty-btn:hover { background: var(--light-sage); border-color: var(--teal); }
+        .sabor-qty-input { width: 36px; text-align: center; border: 1.5px solid var(--border-color); border-radius: 8px; padding: 4px 2px; font-size: 15px; font-family: inherit; font-weight: 600; color: var(--dark-green); background: white; -moz-appearance: textfield; }
+        .sabor-qty-input::-webkit-outer-spin-button, .sabor-qty-input::-webkit-inner-spin-button { -webkit-appearance: none; }
 
         .disclaimer-zona {
             font-size: 12px;
@@ -339,10 +345,46 @@
                         <div class="form-group sabor-group" style="display:none">
                             <label>Sabor/es — elegí uno o más</label>
                             <div class="sabores-checks">
-                                <label class="sabor-check-label"><input type="checkbox" class="sabor-check" value="Clásica (Romero y Sal)" onchange="calcularTotal()"> 🌿 Clásica (Romero y Sal)</label>
-                                <label class="sabor-check-label"><input type="checkbox" class="sabor-check" value="Papa y Parmesano" onchange="calcularTotal()"> 🧀 Papa y Parmesano</label>
-                                <label class="sabor-check-label"><input type="checkbox" class="sabor-check" value="Tomate Cherry y Pesto" onchange="calcularTotal()"> 🍅 Tomate Cherry y Pesto</label>
-                                <label class="sabor-check-label"><input type="checkbox" class="sabor-check" value="Aceitunas" onchange="calcularTotal()"> 🫒 Aceitunas</label>
+                                <div class="sabor-qty-row">
+                                    <span class="sabor-qty-label">🌿 Clásica (Romero y Sal)</span>
+                                    <div class="sabor-qty-control">
+                                        <button type="button" class="qty-btn" onclick="cambiarQty(this,-1)">−</button>
+                                        <input type="number" class="sabor-qty-input" value="0" min="0" max="10" data-sabor="Clásica (Romero y Sal)">
+                                        <button type="button" class="qty-btn" onclick="cambiarQty(this,1)">+</button>
+                                    </div>
+                                </div>
+                                <div class="sabor-qty-row">
+                                    <span class="sabor-qty-label">🧀 Papa y Parmesano</span>
+                                    <div class="sabor-qty-control">
+                                        <button type="button" class="qty-btn" onclick="cambiarQty(this,-1)">−</button>
+                                        <input type="number" class="sabor-qty-input" value="0" min="0" max="10" data-sabor="Papa y Parmesano">
+                                        <button type="button" class="qty-btn" onclick="cambiarQty(this,1)">+</button>
+                                    </div>
+                                </div>
+                                <div class="sabor-qty-row">
+                                    <span class="sabor-qty-label">🍅 Tomate Cherry y Pesto</span>
+                                    <div class="sabor-qty-control">
+                                        <button type="button" class="qty-btn" onclick="cambiarQty(this,-1)">−</button>
+                                        <input type="number" class="sabor-qty-input" value="0" min="0" max="10" data-sabor="Tomate Cherry y Pesto">
+                                        <button type="button" class="qty-btn" onclick="cambiarQty(this,1)">+</button>
+                                    </div>
+                                </div>
+                                <div class="sabor-qty-row">
+                                    <span class="sabor-qty-label">🫒 Aceitunas</span>
+                                    <div class="sabor-qty-control">
+                                        <button type="button" class="qty-btn" onclick="cambiarQty(this,-1)">−</button>
+                                        <input type="number" class="sabor-qty-input" value="0" min="0" max="10" data-sabor="Aceitunas">
+                                        <button type="button" class="qty-btn" onclick="cambiarQty(this,1)">+</button>
+                                    </div>
+                                </div>
+                                <div class="sabor-qty-row">
+                                    <span class="sabor-qty-label">🧅 Cebolla</span>
+                                    <div class="sabor-qty-control">
+                                        <button type="button" class="qty-btn" onclick="cambiarQty(this,-1)">−</button>
+                                        <input type="number" class="sabor-qty-input" value="0" min="0" max="10" data-sabor="Cebolla">
+                                        <button type="button" class="qty-btn" onclick="cambiarQty(this,1)">+</button>
+                                    </div>
+                                </div>
                             </div>
 
                             <!-- Promo dinámica: se llena desde el panel -->
@@ -509,6 +551,15 @@
             calcularTotal();
         }
 
+        function cambiarQty(btn, delta) {
+            var input = btn.parentElement.querySelector('.sabor-qty-input');
+            var val = (parseInt(input.value) || 0) + delta;
+            if (val < 0) val = 0;
+            if (val > 10) val = 10;
+            input.value = val;
+            calcularTotal();
+        }
+
         function calcularTotal() {
             let total = 0;
             const items = document.querySelectorAll('.order-item');
@@ -517,7 +568,7 @@
                 const formato  = item.querySelector('.formato-select').value;
                 const promoVal = item.querySelector('.promo-select') ? item.querySelector('.promo-select').value : '';
                 const promoFmt = PROMOS_ACTIVAS.find(function(p) { return p.esFormato && p.name === formato; });
-                const cantidad = promoFmt ? 1 : item.querySelectorAll('.sabor-check:checked').length;
+                const cantidad = promoFmt ? 1 : Array.from(item.querySelectorAll('.sabor-qty-input')).reduce(function(s, i) { return s + (parseInt(i.value) || 0); }, 0);
 
                 let precioUnitario = 0;
                 if (promoFmt) {
@@ -552,7 +603,7 @@
             const saborGroup = nuevoItem.querySelector('.sabor-group');
             if (saborGroup) {
                 saborGroup.style.display = 'none';
-                saborGroup.querySelectorAll('.sabor-check').forEach(function(cb) { cb.checked = false; });
+                saborGroup.querySelectorAll('.sabor-qty-input').forEach(function(inp) { inp.value = 0; });
             }
 
             // Eliminar info card clonada
@@ -595,7 +646,7 @@
                 const fmt = item.querySelector('.formato-select').value;
                 if (!fmt) return;
                 const esFmt = PROMOS_ACTIVAS.find(function(p) { return p.esFormato && p.name === fmt; });
-                if (!esFmt && item.querySelectorAll('.sabor-check:checked').length === 0) {
+                if (!esFmt && Array.from(item.querySelectorAll('.sabor-qty-input')).reduce(function(s, i) { return s + (parseInt(i.value) || 0); }, 0) === 0) {
                     itemsInvalidos = true;
                 }
             });
@@ -620,10 +671,18 @@
                     if (promoSabores.length) sabor += ' (' + promoSabores.join(' / ') + ')';
                     itemsAgregados.push({ formato: formato, sabor: sabor, cantidad: '1' });
                 } else {
-                    var checkedSabores = Array.from(item.querySelectorAll('.sabor-check:checked')).map(function(c) { return c.value; });
-                    var sabor = checkedSabores.join(' / ');
+                    var saboresParts = [];
+                    var totalQty = 0;
+                    item.querySelectorAll('.sabor-qty-input').forEach(function(inp) {
+                        var q = parseInt(inp.value) || 0;
+                        if (q > 0) {
+                            totalQty += q;
+                            saboresParts.push(q > 1 ? q + 'x ' + inp.dataset.sabor : inp.dataset.sabor);
+                        }
+                    });
+                    var sabor = saboresParts.join(' / ');
                     if (promoVal) sabor += ' (+ ' + promoVal + ')';
-                    itemsAgregados.push({ formato: formato, sabor: sabor, cantidad: String(checkedSabores.length) });
+                    itemsAgregados.push({ formato: formato, sabor: sabor, cantidad: String(totalQty) });
                 }
             });
 
