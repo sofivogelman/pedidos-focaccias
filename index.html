@@ -331,13 +331,9 @@
                             <select class="formato-select" required onchange="manejarCambioFormato(this)">
                                 <option value="" disabled selected>Elegí una opción...</option>
                                 <optgroup label="Tamaños">
-                                    <option value="Enzo">Enzo (15×12 cm) — $4.200</option>
-                                    <option value="Dibu">Dibu (17×13 cm) — $8.000</option>
-                                    <option value="Messi">Messi (31×21 cm) — $12.000</option>
-                                </optgroup>
-                                <optgroup label="Promos Mundialistas ⚽">
-                                    <option value="Box Mundialista ⚽">Box Mundialista ⚽ — $30.000</option>
-                                    <option value="La Previa 🍷">La Previa 🍷 — $20.000</option>
+                                    <option value="La mía">La mía (15×12 cm) — $4.200</option>
+                                    <option value="La nuestra">La nuestra (17×13 cm) — $8.000</option>
+                                    <option value="La de todos">La de todos (31×21 cm) — $12.000</option>
                                 </optgroup>
                             </select>
                         </div>
@@ -426,10 +422,7 @@
 
         // ─── Promos dinámicas desde el panel ──────────────────────────────────
         const PROMOS_URL = "https://raw.githubusercontent.com/sofivogelman/focacciapanel/main/promos.json";
-        let PROMOS_ACTIVAS = [
-            { id: 4, name: "Box Mundialista ⚽", tipo: "Combo Mundialista", price: 30000, notes: "Para dos. Incluye 2 focaccias Enzo (15×12 cm) a elección, una picada para compartir y un Malbec.", active: true, esFormato: true, items: [{format:"Enzo",qty:2}] },
-            { id: 5, name: "La Previa 🍷",       tipo: "Combo Mundialista", price: 20000, notes: "Incluye 1 focaccia Messi (31×21 cm) a elección y un Malbec. Edición especial Mundial 2026.",          active: true, esFormato: true, items: [{format:"Messi",qty:1}] }
-        ];
+        let PROMOS_ACTIVAS = [];
 
         async function cargarPromos() {
             try {
