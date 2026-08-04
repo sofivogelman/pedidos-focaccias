@@ -335,6 +335,9 @@
                                     <option value="La nuestra">La nuestra (17×13 cm) — $8.000</option>
                                     <option value="La de todos">La de todos (31×21 cm) — $12.000</option>
                                 </optgroup>
+                                <optgroup label="Promos">
+                                    <option value="4 La mía">🎁 4 La mía — $15.000</option>
+                                </optgroup>
                             </select>
                         </div>
 
@@ -422,7 +425,16 @@
 
         // ─── Promos dinámicas desde el panel ──────────────────────────────────
         const PROMOS_URL = "https://raw.githubusercontent.com/sofivogelman/focacciapanel/main/promos.json";
-        let PROMOS_ACTIVAS = [];
+        let PROMOS_ACTIVAS = [
+            {
+                name: "4 La mía",
+                esFormato: true,
+                active: true,
+                price: 15000,
+                notes: "4 focaccias individuales a tu elección de sabor",
+                items: [{ format: "La mía", qty: 4 }]
+            }
+        ];
 
         async function cargarPromos() {
             try {
@@ -511,7 +523,8 @@
                     '<option value="Clásica (Romero y Sal)">🌿 Clásica (Romero y Sal)</option>' +
                     '<option value="Papa y Parmesano">🧀 Papa y Parmesano</option>' +
                     '<option value="Tomate Cherry y Pesto">🍅 Tomate Cherry y Pesto</option>' +
-                    '<option value="Aceitunas">🫒 Aceitunas</option>';
+                    '<option value="Aceitunas">🫒 Aceitunas</option>' +
+                    '<option value="Cebolla">🧅 Cebolla</option>';
                 var saboresHTML = '';
                 if (promoFmt.items && promoFmt.items.length > 0) {
                     var totalFocaccias = promoFmt.items.reduce(function(t,i){return t+i.qty;},0);
