@@ -180,6 +180,39 @@
             line-height: 1.4;
         }
 
+        .momento-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .momento-btn {
+            flex: 1;
+            min-width: 70px;
+            padding: 10px 6px;
+            border: 1.5px solid var(--border-color);
+            border-radius: 8px;
+            background: #fafafa;
+            color: var(--dark-green);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+
+        .momento-btn:hover {
+            border-color: var(--sage-green);
+            background: var(--light-sage);
+        }
+
+        .momento-btn.selected {
+            background: var(--sage-green);
+            color: white;
+            border-color: var(--sage-green);
+        }
+
         .add-item-btn {
             width: 100%;
             background-color: transparent;
@@ -321,6 +354,22 @@
                 <div id="barrioEspecificoContainer" style="display: none; margin-top: 10px;">
                     <input type="text" id="barrioEspecifico" name="barrioEspecifico" placeholder="¿Dónde? (Ej: San Isidro Labrador u otra zona)">
                 </div>
+            </div>
+
+            <div class="form-group">
+                <label for="fechaEntrega">Fecha de entrega</label>
+                <input type="date" id="fechaEntrega" name="fechaEntrega" required>
+            </div>
+
+            <div class="form-group">
+                <label>Momento del día</label>
+                <div class="momento-group">
+                    <button type="button" class="momento-btn" onclick="seleccionarMomento(this)">☀️ Mañana</button>
+                    <button type="button" class="momento-btn" onclick="seleccionarMomento(this)">🌤 Mediodía</button>
+                    <button type="button" class="momento-btn" onclick="seleccionarMomento(this)">🌇 Tarde</button>
+                    <button type="button" class="momento-btn" onclick="seleccionarMomento(this)">🌙 Noche</button>
+                </div>
+                <input type="hidden" id="momentoSeleccionado" value="">
             </div>
 
             <div class="order-section">
@@ -557,6 +606,12 @@
             calcularTotal();
         }
 
+        function seleccionarMomento(btn) {
+            document.querySelectorAll('.momento-btn').forEach(function(b) { b.classList.remove('selected'); });
+            btn.classList.add('selected');
+            document.getElementById('momentoSeleccionado').value = btn.textContent.trim();
+        }
+
         function cambiarQty(btn, delta) {
             var input = btn.parentElement.querySelector('.sabor-qty-input');
             var val = (parseInt(input.value) || 0) + delta;
@@ -663,6 +718,13 @@
                 return;
             }
 
+            if (!document.getElementById('momentoSeleccionado').value) {
+                alert('Por favor, elegí un momento del día para la entrega.');
+                submitBtn.innerText = 'Confirmar Pedido';
+                submitBtn.disabled = false;
+                return;
+            }
+
             const itemsAgregados = [];
             document.querySelectorAll('.order-item').forEach(function(item) {
                 const formato  = item.querySelector('.formato-select').value;
@@ -703,7 +765,7 @@
                 nombre:       document.getElementById('nombre').value,
                 telefono:     document.getElementById('telefono').value,
                 zona:         zonaFinal,
-                dia:          "A coordinar",
+                dia:          (document.getElementById('fechaEntrega').value || '') + (document.getElementById('momentoSeleccionado').value ? ' - ' + document.getElementById('momentoSeleccionado').value : ''),
                 aclaraciones: document.getElementById('aclaraciones').value,
                 total:        document.getElementById('totalTexto').innerText.replace("Total: ", ""),
                 items:        itemsAgregados
